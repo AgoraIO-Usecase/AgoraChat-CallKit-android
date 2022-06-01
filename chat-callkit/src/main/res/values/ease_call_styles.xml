@@ -1,0 +1,63 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/em_base_color_primary</item>
+        <item name="colorPrimaryDark">@color/em_base_color_primary_dark</item>
+        <item name="colorAccent">@color/em_base_color_accent</item>
+        <!-- Customize EditText text color -->
+        <item name="android:editTextColor">@color/black</item>
+        <!-- Customize text cursor -->
+        <!-- Customize text color hint -->
+        <item name="android:textColorHint">@color/em_base_color_text_hint</item>
+        <item name="android:windowBackground">@color/em_base_color_window_bg</item>
+        <!-- remove button default shadow effect -->
+        <item name="android:buttonStyle">@style/Button.BorderLess</item>
+    </style>
+
+    <style name="NoActionBar.Dark" parent="Theme.AppCompat.NoActionBar">
+
+    </style>
+
+    <style name="NoActionBar.SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <item name="android:windowBackground">@color/blue</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:windowFullscreen">true</item>-->
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+        <item name="android:windowActionBar">false</item>
+    </style>
+
+    <!--指定Dialog的主题-->
+    <style name="Dialog.Light" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/em_base_color_accent</item>
+    </style>
+
+    <style name="style_call_tools_panel_button">
+        <item name="android:layout_width">28dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">@drawable/call_btn_bg</item>
+    </style>
+
+    <style name="style_call_panel_button">
+        <item name="android:layout_width">47dp</item>
+        <item name="android:layout_height">47dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">@drawable/call_btn_bg</item>
+    </style>
+
+    <style name="style_call_tools_panel_button_wrapper">
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="Theme.Chatandroid.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Chatandroid.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>

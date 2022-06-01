@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="104dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginTop="?android:attr/actionBarSize"
+    android:layout_marginRight="10dp"
+    android:background="@drawable/call_shape_gray_60_000000_corner14"
+    android:paddingLeft="20dp"
+    android:paddingTop="10dp"
+    android:paddingRight="20dp"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:maxLength="20"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Joan" />
+
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="13dp"
+        android:layout_height="13dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/call_agora_icon"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_name" />
+
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:text="@string/ease_call_head_view_single_video_subtitle"
+        android:textColor="@color/ease_call_head_view_subtitle_color"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintBottom_toBottomOf="@id/iv_icon"
+        app:layout_constraintLeft_toRightOf="@id/iv_icon"
+        app:layout_constraintTop_toTopOf="@id/iv_icon" />
+
+    <ImageButton
+        android:id="@+id/btn_call_head_refuse"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/call_head_refuse"
+        android:padding="2dp"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="@id/btn_call_head_agree"
+        app:layout_constraintRight_toLeftOf="@id/btn_call_head_agree"
+        app:layout_constraintTop_toTopOf="@id/btn_call_head_agree" />
+
+    <ImageButton
+        android:id="@+id/btn_call_head_agree"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/call_head_agree"
+        android:padding="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

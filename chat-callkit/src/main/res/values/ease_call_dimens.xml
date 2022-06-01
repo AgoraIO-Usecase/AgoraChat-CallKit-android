@@ -1,0 +1,47 @@
+<resources>
+    <dimen name="em_common_title_bar_height">44dp</dimen>
+    <dimen name="em_common_search_height">36dp</dimen>
+    <dimen name="em_common_side_bar_width">25dp</dimen>
+    <dimen name="em_common_item_height">66dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="em_size_small">12sp</dimen>
+    <dimen name="em_size_normal">14sp</dimen>
+    <dimen name="em_size_big">16sp</dimen>
+    <dimen name="em_size_big_notify">18sp</dimen>
+    <dimen name="em_login_bg_radius">57dp</dimen>
+    <dimen name="em_login_margin_left">33dp</dimen>
+    <dimen name="em_login_margin_right">33dp</dimen>
+    <dimen name="em_login_margin_top">20dp</dimen>
+    <dimen name="em_login_padding_left">18dp</dimen>
+    <dimen name="em_login_padding_right">18dp</dimen>
+    <dimen name="em_login_text_size">@dimen/em_size_big</dimen>
+    <dimen name="em_login_server_hint_text_size">@dimen/em_size_normal</dimen>
+    <dimen name="em_main_badge_size">25dp</dimen>
+    <dimen name="em_main_badge_margin_left">35dp</dimen>
+    <dimen name="em_main_badge_margin_top">5dp</dimen>
+    <dimen name="em_empty_layout_text_size">@dimen/em_size_small</dimen>
+    <dimen name="em_add_contact_title_bar_height">36dp</dimen>
+    <dimen name="em_friends_header_item_height">58dp</dimen>
+    <dimen name="em_friends_contact_detail_note_size">@dimen/em_size_normal</dimen>
+    <dimen name="em_about_me_avatar_size">25dp</dimen>
+    <dimen name="em_margin_15">15dp</dimen>
+    <dimen name="em_margin_10">10dp</dimen>
+    <dimen name="em_margin_20">20dp</dimen>
+    <dimen name="em_margin_30">30dp</dimen>
+    <dimen name="em_margin_40">40dp</dimen>
+    <dimen name="em_padding_20">20dp</dimen>
+    <dimen name="em_padding_15">15dp</dimen>
+    <dimen name="em_padding_10">10dp</dimen>
+    <dimen name="padding_search_bar">5dp</dimen>
+    <dimen name="recall_dimen">8dp</dimen>
+    <dimen name="recall_dimen_bg">2dp</dimen>
+    <dimen name="recall_dimen_4">4dp</dimen>
+    <dimen name="recall_dimen_256">256dp</dimen>
+    <dimen name="recall_size_12">12sp</dimen>
+    <dimen name="recall_size_8">8sp</dimen>
+    <dimen name="activity_animation_duration">5000</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <item type="id" name="tag_from_userid"></item>
+    <item type="id" name="tag_call_type"></item>
+</resources>

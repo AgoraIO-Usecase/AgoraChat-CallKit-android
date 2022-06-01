@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/opposite_surface_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:id="@+id/btn_float"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginEnd="4dp"
+        android:src="@drawable/call_arrow_left"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <io.agora.chat.callkit.widget.EaseCallImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="84dp"
+        android:src="@drawable/ease_default_avatar"
+        app:ease_shape_type="round"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_avatar"
+        tools:ignore="HardcodedText"
+        tools:text="张三" />
+
+    <TextView
+        android:id="@+id/tv_call_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/em_size_big"
+        android:visibility="visible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_nick"
+        tools:text="@string/ease_call_calling" />
+
+
+    <ImageView
+        android:id="@+id/iv_vidicon_video_called"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="60dp"
+        android:src="@drawable/call_video_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/btn_refuse_video_called" />
+
+    <ImageButton
+        android:id="@+id/btn_refuse_video_called"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/call_end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/iv_vidicon_video_called"
+        app:layout_constraintRight_toLeftOf="@id/btn_answer_video_called" />
+
+    <ImageButton
+        android:id="@+id/btn_answer_video_called"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_marginEnd="37dp"
+        android:layout_marginRight="40dp"
+        android:background="@drawable/call_voice_answer"
+        app:layout_constraintBottom_toBottomOf="@id/btn_refuse_video_called"
+        app:layout_constraintLeft_toRightOf="@id/btn_refuse_video_called"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_switch_camera"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/call_change_camera"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/ll_video_called_control"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="iv_vidicon_video_called,btn_refuse_video_called,btn_answer_video_called" />
+</androidx.constraintlayout.widget.ConstraintLayout>

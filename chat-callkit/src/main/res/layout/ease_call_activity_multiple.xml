@@ -1,0 +1,247 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/black"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scrollbarSize="5dp"
+        app:layout_constraintBottom_toTopOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp">
+
+        <io.agora.chat.callkit.widget.EaseCallMemberViewGroup
+            android:id="@+id/surface_view_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true" />
+
+    </HorizontalScrollView>
+
+    <ImageButton
+        android:id="@+id/btn_float"
+        style="@style/style_call_tools_panel_button"
+        android:layout_marginStart="@dimen/em_margin_15"
+        android:layout_marginLeft="@dimen/em_margin_15"
+        android:layout_marginTop="35dp"
+        android:layout_marginEnd="4dp"
+        android:src="@drawable/call_arrow_left"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/btn_float"
+        app:layout_constraintLeft_toRightOf="@id/btn_float"
+        app:layout_constraintTop_toTopOf="@id/btn_float"
+        tools:text="Video Call" />
+
+    <TextView
+        android:id="@+id/tv_call_time"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:gravity="center"
+        android:text="00:00"
+        android:textColor="#4C4C4C"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/rl_video_control"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+
+    <RelativeLayout
+        android:id="@+id/rl_video_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:paddingTop="40dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageButton
+            android:id="@+id/btn_mic_switch_video"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/call_mute_normal" />
+
+        <ImageButton
+            android:id="@+id/btn_hangup_video"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="40dp"
+            android:background="@drawable/call_audio_call_end"
+            android:scaleType="fitCenter" />
+
+        <ImageButton
+            android:id="@+id/btn_vidicon"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="40dp"
+            android:background="@drawable/ease_call_video_off" />
+
+        <TextView
+            android:id="@+id/tv_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_below="@+id/btn_vidicon"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="51dp"
+            android:gravity="center"
+            android:text="@string/ease_call_camera"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_voice_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="60dp"
+        android:paddingTop="40dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageButton
+            android:id="@+id/btn_mic_switch_voice"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/call_mute_normal" />
+
+        <TextView
+            android:id="@+id/tv_mic_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_below="@+id/btn_mic_switch_voice"
+            android:layout_marginLeft="49sp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/ease_call_mute"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btn_speaker_switch_voice"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_marginLeft="40dp"
+            android:background="@drawable/ease_call_voice_on" />
+
+        <TextView
+            android:id="@+id/tv_speaker"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_below="@+id/btn_speaker_switch_voice"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/ease_call_hands_free"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btn_hangup_voice"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginRight="40dp"
+            android:background="@drawable/call_audio_call_end"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/tv_hangup_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_below="@+id/btn_hangup_voice"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:text="@string/ease_call_hang_up"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/btn_change_camera_switch"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/call_change_camera"
+        app:layout_constraintRight_toLeftOf="@id/btn_invite"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_camera_change"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="31dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:text="@string/ease_call_switch_camera"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@id/btn_change_camera_switch"
+        app:layout_constraintRight_toRightOf="@id/btn_change_camera_switch"
+        app:layout_constraintTop_toBottomOf="@id/btn_change_camera_switch" />
+
+    <ImageView
+        android:id="@+id/btn_invite"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginRight="24dp"
+        android:src="@drawable/call_add_person"
+        android:visibility="visible"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="rl_video_control,rl_voice_control" />
+
+    <io.agora.chat.callkit.widget.EaseCallCommingCallView
+        android:id="@+id/incoming_call_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+</androidx.constraintlayout.widget.ConstraintLayout>

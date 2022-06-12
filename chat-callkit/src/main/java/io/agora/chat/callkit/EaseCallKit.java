@@ -36,13 +36,10 @@ import androidx.annotation.Nullable;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import io.agora.CallBack;
 import io.agora.MessageListener;
@@ -1061,13 +1058,11 @@ public class EaseCallKit {
     private class TimeHandler extends Handler {
         private final int MSG_TIMER = 0;
         private final int MSG_START_ACTIVITY = 1;
-        private DateFormat dateFormat = null;
         private int timePassed = 0;
         private boolean isAgreedInHeadDialog = false;
 
         public TimeHandler() {
-            dateFormat = new SimpleDateFormat("HH:mm:ss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         }
 
         public void startTime() {
@@ -1090,7 +1085,6 @@ public class EaseCallKit {
         public void handleMessage(Message msg) {
             if (msg.what == MSG_TIMER) {
                 timePassed++;
-                String time = dateFormat.format(timePassed * 1000);
                 if (timePassed * 1000 == EaseCallMsgUtils.CALL_INVITED_INTERVAL) {
 
                     // Call timed out

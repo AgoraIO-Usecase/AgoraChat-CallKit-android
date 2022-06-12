@@ -1,15 +1,18 @@
 package io.agora.chat.callkit.general;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
-import static io.agora.chat.callkit.utils.EaseCallKitUtils.dp2px;
 import static io.agora.chat.callkit.utils.EaseCallImageUtil.setBgRadius;
+import static io.agora.chat.callkit.utils.EaseCallImageUtil.setImage;
+import static io.agora.chat.callkit.utils.EaseCallKitUtils.dp2px;
+import static io.agora.chat.callkit.utils.EaseCallKitUtils.getCallTimeFormatString;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,8 +23,10 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import java.util.Map;
 
@@ -32,6 +37,7 @@ import io.agora.chat.callkit.bean.EaseUserAccount;
 import io.agora.chat.callkit.ui.EaseCallBaseActivity;
 import io.agora.chat.callkit.utils.EaseCallKitUtils;
 import io.agora.chat.callkit.widget.EaseCallChronometer;
+import io.agora.chat.callkit.widget.EaseCallImageView;
 import io.agora.chat.callkit.widget.EaseCallMemberView;
 import io.agora.rtc.RtcEngine;
 import io.agora.rtc.video.VideoCanvas;
@@ -40,16 +46,15 @@ import io.agora.util.EMLog;
 
 public class EaseCallFloatWindow {
     private static final String TAG = "EaseCallFloatWindow";
+    private static final int UPDATA_FLOAT_WINDOW_TIME = 111;
 
     private Context context;
-
     private static EaseCallFloatWindow instance;
-
     private WindowManager windowManager = null;
     private WindowManager.LayoutParams layoutParams = null;
 
     private View floatView;
-    private ImageView avatarView;
+    private EaseCallImageView avatarView;
     private TextureView textureView;
 
     private int screenWidth;
@@ -61,6 +66,20 @@ public class EaseCallFloatWindow {
     private long costSeconds;
     private ConferenceInfo conferenceInfo;
     private SingleCallInfo singleCallInfo;
+
+    private Handler handler=new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if(msg.what==UPDATA_FLOAT_WINDOW_TIME) {
+                handler.removeMessages(UPDATA_FLOAT_WINDOW_TIME);
+                tvTime.setText(getCallTimeFormatString(getTotalCostSeconds()));
+                handler.sendEmptyMessageDelayed(UPDATA_FLOAT_WINDOW_TIME,1);
+            }
+        }
+    };
+    private TextView tvTime;
+    private boolean isRemoteVideoMuted;
 
     public EaseCallFloatWindow(Context context) {
         initFloatWindow(context);
@@ -123,6 +142,13 @@ public class EaseCallFloatWindow {
         this.costSeconds = seconds;
     }
 
+    public boolean isRemoteVideoMuted() {
+        return isRemoteVideoMuted;
+    }
+
+    public void setRemoteVideoMuted(boolean remoteVideoMuted) {
+        isRemoteVideoMuted = remoteVideoMuted;
+    }
     /**
      * add float window
      */
@@ -163,7 +189,8 @@ public class EaseCallFloatWindow {
                 }
             }
         });
-        avatarView = (ImageView) floatView.findViewById(R.id.iv_avatar);
+        avatarView =  floatView.findViewById(R.id.iv_avatar);
+        tvTime =  floatView.findViewById(R.id.tv_time);
 
         floatView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -298,6 +325,8 @@ public class EaseCallFloatWindow {
             boolean isSelf = TextUtils.equals(userAccount, ChatClient.getInstance().getCurrentUser());
             prepareSurfaceView(isSelf,uId);
         }
+        handler.removeMessages(UPDATA_FLOAT_WINDOW_TIME);
+        handler.sendEmptyMessage(UPDATA_FLOAT_WINDOW_TIME);
     }
 
     /**
@@ -307,20 +336,23 @@ public class EaseCallFloatWindow {
      * @param remoteUid
      * @param surface
      */
-    public void update(boolean isSelf, int curUid, int remoteUid, boolean surface) {
+    public void update(boolean isSelf,String remoteUrl, int curUid, int remoteUid, boolean surface) {
         if(singleCallInfo == null) {
             singleCallInfo = new SingleCallInfo();
         }
         singleCallInfo.curUid = curUid;
         singleCallInfo.remoteUid = remoteUid;
-        if(callType == EaseCallType.SINGLE_VIDEO_CALL && surface){
+        if(callType == EaseCallType.SINGLE_VIDEO_CALL && surface&&!isRemoteVideoMuted){
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.GONE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.VISIBLE);
             prepareSurfaceView(isSelf, isSelf ? curUid : remoteUid);
         }else{
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.VISIBLE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.GONE);
+            setImage(context,avatarView,remoteUrl);
         }
+        handler.removeMessages(UPDATA_FLOAT_WINDOW_TIME);
+        handler.sendEmptyMessage(UPDATA_FLOAT_WINDOW_TIME);
     }
 
     public SingleCallInfo getSingleCallInfo() {
@@ -374,6 +406,7 @@ public class EaseCallFloatWindow {
         if(singleCallInfo != null) {
             singleCallInfo = null;
         }
+        handler.removeCallbacksAndMessages(null);
     }
 
     /**

@@ -171,6 +171,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     isInComingCall = false;
                 }
             }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBinding.chronometer.start();
+                }
+            });
         }
 
         @Override
@@ -628,7 +634,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
             EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
             // Set the small window hover type(设置小窗口悬浮类型)
-            EaseCallFloatWindow.getInstance().setCallType(EaseCallType.CONFERENCE_VIDEO_CALL);
+            EaseCallFloatWindow.getInstance().setCallType(callType);
         } catch (Exception e) {
             EMLog.e(TAG, Log.getStackTraceString(e));
             throw new RuntimeException("NEED TO check rtc sdk init fatal error\n" + Log.getStackTraceString(e));
@@ -1119,7 +1125,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     long intervalTime;
                     EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
                     if (callKitConfig != null) {
-                        intervalTime = callKitConfig.getCallTimeOut();
+                        intervalTime = callKitConfig.getCallTimeOut()*1000;
                     } else {
                         intervalTime = EaseCallMsgUtils.CALL_INVITE_INTERVAL;
                     }
@@ -1191,12 +1197,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 //update user nickname and image (更新头像昵称)
                 notifyUserToUpdateUserInfo(username,0);
 
-
                 long totalMilliSeconds = System.currentTimeMillis();
                 long intervalTime;
                 EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
                 if (callKitConfig != null) {
-                    intervalTime = callKitConfig.getCallTimeOut();
+                    intervalTime = callKitConfig.getCallTimeOut()*1000;
                 } else {
                     intervalTime = EaseCallMsgUtils.CALL_INVITE_INTERVAL;
                 }
@@ -1259,7 +1264,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             EaseCallKit.getInstance().setCallID(EaseCallKitUtils.getRandomString(10));
         }
         message.setAttribute(EaseCallMsgUtils.CLL_ID, EaseCallKit.getInstance().getCallID());
-
         message.setAttribute(EaseCallMsgUtils.CLL_TIMESTRAMEP, System.currentTimeMillis());
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);
 
@@ -1502,6 +1506,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             public void run() {
                 EMLog.i(TAG, "exit channel channelName: " + channelName);
                 EaseCallAudioControl.getInstance().stopPlayRing();
+                mBinding.chronometer.stop();
                 leaveChannel();
                 if (!isInComingCall) {
                     if (invitedUsersTime.size() > 0) {

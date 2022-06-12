@@ -16,10 +16,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import io.agora.chat.callkit.EaseCallKit;
@@ -37,15 +40,16 @@ public class EaseCallKitUtils {
 
     /**
      * length用户要求产生字符串的长度，随机生成会议密码
+     *
      * @param length
      * @return
      */
-    static public String getRandomString(int length){
-        String str="abcdefghijklmnopqrstuvwxyz";
-        Random random=new Random();
-        StringBuffer sb=new StringBuffer();
-        for(int i=0;i<length;i++){
-            int number=random.nextInt(26);
+    static public String getRandomString(int length) {
+        String str = "abcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(26);
             sb.append(str.charAt(number));
         }
         return sb.toString();
@@ -54,16 +58,17 @@ public class EaseCallKitUtils {
 
     /**
      * 获取手机唯一标识符
+     *
      * @return
      */
-    public static String getPhoneSign(){
+    public static String getPhoneSign() {
         StringBuilder deviceId = new StringBuilder();
         // 渠道标志
         deviceId.append("a");
         try {
             // 则生成一个id：随机码
             String uuid = getUUID();
-            if(!TextUtils.isEmpty(uuid)){
+            if (!TextUtils.isEmpty(uuid)) {
                 deviceId.append("id");
                 deviceId.append(uuid);
                 return deviceId.toString();
@@ -76,75 +81,79 @@ public class EaseCallKitUtils {
     }
 
     private static String uuid;
-    public static String getUUID(){
-          SharedPreferences mShare = EaseCallKit.getInstance().getContext().getSharedPreferences("uuid",MODE_PRIVATE);
-          if(mShare != null){
-              uuid = mShare.getString("uuid", "");
-          }
-          if(TextUtils.isEmpty(uuid)){
-              uuid = UUID.randomUUID().toString();
-              mShare.edit().putString("uuid",uuid).commit();
-          }
-          return uuid;
+
+    public static String getUUID() {
+        SharedPreferences mShare = EaseCallKit.getInstance().getContext().getSharedPreferences("uuid", MODE_PRIVATE);
+        if (mShare != null) {
+            uuid = mShare.getString("uuid", "");
+        }
+        if (TextUtils.isEmpty(uuid)) {
+            uuid = UUID.randomUUID().toString();
+            mShare.edit().putString("uuid", uuid).commit();
+        }
+        return uuid;
     }
 
     /**
      * 获取用户头像
+     *
      * @param uersId
      * @return
      */
-    public static String getUserHeadImage(String uersId){
+    public static String getUserHeadImage(String uersId) {
         EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
-        if(callKitConfig != null){
+        if (callKitConfig != null) {
             Map<String, EaseCallUserInfo> userInfoMap = callKitConfig.getUserInfoMap();
-            if(userInfoMap != null){
+            if (userInfoMap != null) {
                 EaseCallUserInfo userInfo = userInfoMap.get(uersId);
-                if(userInfo != null){
-                    if(userInfo.getHeadImage() != null && userInfo.getHeadImage().length() > 0){
+                if (userInfo != null) {
+                    if (userInfo.getHeadImage() != null && userInfo.getHeadImage().length() > 0) {
                         return userInfo.getHeadImage();
                     }
                 }
             }
             return callKitConfig.getDefaultHeadImage();
         }
-        return  null;
+        return null;
     }
 
     /**
      * 获取用户昵称
+     *
      * @param uersId
      * @return
      */
-    public static String  getUserNickName(String uersId){
+    public static String getUserNickName(String uersId) {
         EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
-        if(callKitConfig != null){
+        if (callKitConfig != null) {
             Map<String, EaseCallUserInfo> userInfoMap = callKitConfig.getUserInfoMap();
-            if(userInfoMap != null){
+            if (userInfoMap != null) {
                 EaseCallUserInfo userInfo = userInfoMap.get(uersId);
-                if(userInfo != null){
-                    if(userInfo.getNickName() != null && userInfo.getNickName().length() > 0){
+                if (userInfo != null) {
+                    if (userInfo.getNickName() != null && userInfo.getNickName().length() > 0) {
                         return userInfo.getNickName();
                     }
                 }
             }
             return uersId;
         }
-        return  uersId;
+        return uersId;
     }
 
 
     /**
      * 获取用户振铃文件
+     *
      * @return
      */
-    public static String getRingFile(){
+    public static String getRingFile() {
         EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
-        if(callKitConfig != null){
-            if(callKitConfig.getRingFile() != null){
+        if (callKitConfig != null) {
+            if (callKitConfig.getRingFile() != null) {
                 return callKitConfig.getRingFile();
             }
         }
-        return  null;
+        return null;
     }
 
     public static boolean isAppRunningForeground(Context ctx) {
@@ -190,11 +199,11 @@ public class EaseCallKitUtils {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             List<ActivityManager.AppTask> list = activityManager.getAppTasks();
-            for (ActivityManager.AppTask appTask : list){
+            for (ActivityManager.AppTask appTask : list) {
                 appTask.moveToFront();
                 break;
             }
-        }else {
+        } else {
             /**获得当前运行的task(任务)*/
             List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
             for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
@@ -219,12 +228,12 @@ public class EaseCallKitUtils {
             } else if (value instanceof List) { // is a JSONArray
                 result = new JSONArray();
                 for (Object item : (List) value) {
-                    ((JSONArray)result).put(item);
+                    ((JSONArray) result).put(item);
                 }
             } else if (value instanceof Object[]) {
                 result = new JSONArray();
                 for (Object item : (Object[]) value) {
-                    ((JSONArray)result).put(item);
+                    ((JSONArray) result).put(item);
                 }
             } else { // is common value
                 result = value;
@@ -249,27 +258,34 @@ public class EaseCallKitUtils {
 
     /**
      * 判断用户是否重写EaseCallKitListener中的onGenerateToken方法
+     *
      * @param listener
      * @return
      */
     public static boolean realizeGetToken(EaseCallKitListener listener) {
-        if(listener != null){
+        if (listener != null) {
             Method cMethod = null;
             try {
-                cMethod = listener.getClass().getDeclaredMethod("onGenerateRTCToken", String.class,String.class,EaseCallKitTokenCallback.class);
-                EMLog.d(TAG,"realizeGetToken result:"+cMethod.toString());
-                if(cMethod != null){
-                    return  true;
+                cMethod = listener.getClass().getDeclaredMethod("onGenerateRTCToken", String.class, String.class, EaseCallKitTokenCallback.class);
+                EMLog.d(TAG, "realizeGetToken result:" + cMethod.toString());
+                if (cMethod != null) {
+                    return true;
                 }
             } catch (NoSuchMethodException e) {
-                EMLog.e(TAG,"realizeGetToken result:"+e.getLocalizedMessage());
+                EMLog.e(TAG, "realizeGetToken result:" + e.getLocalizedMessage());
                 return false;
             }
         }
         return false;
     }
 
-    public static int dp2px(Context context,int dp) {
+    public static int dp2px(Context context, int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
+
+    public static String getCallTimeFormatString(long secondTimePassed) {
+        DateFormat dateFormat = new SimpleDateFormat("mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+       return dateFormat.format(secondTimePassed * 1000);
     }
 }

@@ -16,7 +16,7 @@ public class EaseCallKitConfig {
     private Map<String, EaseCallUserInfo> userInfoMap = new HashMap<>();
     private String ringFile;
     private String agoraAppId;
-    private long callTimeOut = 30 * 1000;
+    private long callTimeOut = 30;
     private boolean enableRTCToken = false;
 
     /**
@@ -163,7 +163,7 @@ public class EaseCallKitConfig {
 
     /**
      * \~chinese
-     * 设置呼叫超时时间 (单位ms 默认30s)
+     * 设置呼叫超时时间 (单位s 默认30s)
      * @param callTimeOut 呼叫超时时间
      * <p>
      * \~english

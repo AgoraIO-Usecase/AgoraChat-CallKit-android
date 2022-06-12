@@ -19,8 +19,8 @@
         android:id="@+id/local_surface_layout"
         android:layout_width="90dp"
         android:layout_height="160dp"
-        android:layout_marginTop="140dp"
-        android:layout_marginRight="40dp"
+        android:layout_marginTop="90dp"
+        android:layout_marginRight="15dp"
         app:layout_constraintCircleRadius="15dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -168,8 +168,8 @@
 
     <ImageView
         android:id="@+id/iv_mute"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginBottom="60dp"
         android:scaleType="fitCenter"
         android:src="@drawable/call_mute_normal"
@@ -193,8 +193,8 @@
 
     <ImageView
         android:id="@+id/iv_handsfree"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginLeft="37dp"
         android:layout_marginBottom="60dp"
         android:scaleType="fitCenter"
@@ -511,8 +511,8 @@
 
     <io.agora.chat.callkit.widget.EaseCallImageView
         android:id="@+id/iv_call_redial"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginLeft="60dp"
         android:layout_marginBottom="92dp"
         android:src="@drawable/call_redial"
@@ -522,8 +522,8 @@
 
     <io.agora.chat.callkit.widget.EaseCallImageView
         android:id="@+id/iv_call_close"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginRight="60dp"
         android:src="@drawable/call_close"
         app:ease_shape_type="round"
@@ -547,8 +547,8 @@
         android:id="@+id/tv_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/ease_call_redial"
+        android:layout_marginTop="5dp"
+        android:text="@string/ease_call_close"
         android:textColor="#80ffffff"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@id/tv_redial"

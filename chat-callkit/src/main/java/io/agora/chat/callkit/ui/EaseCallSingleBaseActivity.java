@@ -801,6 +801,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             updateOppositeSurfaceLayoutUid(remoteUId);
             updateLocalSurfaceLayoutUid(0);
         }
+        if(isFloatWindowShowing()) {
+            EaseCallFloatWindow.getInstance().setRemoteVideoMuted(isRemoteVideoMuted);
+            EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl,0, remoteUId, true);
+        }
     }
 
     private void sendAgreeMessage() {
@@ -1343,7 +1347,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 long intervalTime;
                 EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
                 if (callKitConfig != null) {
-                    intervalTime = callKitConfig.getCallTimeOut();
+                    intervalTime = callKitConfig.getCallTimeOut()*1000;
                 } else {
                     intervalTime = EaseCallMsgUtils.CALL_INVITE_INTERVAL;
                 }
@@ -1541,7 +1545,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         if (isInComingCall && EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_ANSWERED) {
             surface = false;
         }
-        EaseCallFloatWindow.getInstance().update(!changeFlag, 0, remoteUId, surface);
+        EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl,0, remoteUId, surface);
         EaseCallFloatWindow.getInstance().setCameraDirection(isCameraFront, changeFlag);
         moveTaskToBack(false);
     }

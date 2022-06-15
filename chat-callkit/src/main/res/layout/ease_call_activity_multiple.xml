@@ -96,7 +96,7 @@
             android:layout_height="62dp"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="40dp"
-            android:background="@drawable/ease_call_video_off" />
+            android:background="@drawable/call_video_on" />
 
         <TextView
             android:id="@+id/tv_camera"

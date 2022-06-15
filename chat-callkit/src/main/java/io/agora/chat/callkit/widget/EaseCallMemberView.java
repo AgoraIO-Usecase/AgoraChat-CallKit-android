@@ -30,7 +30,8 @@ public class EaseCallMemberView extends RelativeLayout {
     private Context context;
     private RelativeLayout surfaceViewLayout;
     private EaseCallImageView avatarView;
-    private ImageView audioOffView;
+    private ImageView audioOffInVideo;
+    private ImageView audioOffInVoice;
     private ImageView talkingView;
     private TextView nameView;
     private SurfaceView surfaceView;
@@ -71,7 +72,8 @@ public class EaseCallMemberView extends RelativeLayout {
     private void init() {
         surfaceViewLayout = findViewById(R.id.item_surface_layout);
         avatarView = (EaseCallImageView) findViewById(R.id.img_call_avatar);
-        audioOffView = (ImageView) findViewById(R.id.icon_mute);
+        audioOffInVideo = (ImageView) findViewById(R.id.mic_mute_in_video);
+        audioOffInVoice = (ImageView) findViewById(R.id.mic_mute_in_voice);
         talkingView = (ImageView) findViewById(R.id.icon_talking);
         nameView = (TextView) findViewById(R.id.text_name);
         loading_dialog = findViewById(R.id.member_loading);
@@ -79,10 +81,10 @@ public class EaseCallMemberView extends RelativeLayout {
 
     }
 
-    public void setLoading(Boolean loading){
-        if(loading){
+    public void setLoading(Boolean loading) {
+        if (loading) {
             loading_dialog.setVisibility(VISIBLE);
-        }else {
+        } else {
             loading_dialog.setVisibility(GONE);
         }
     }
@@ -98,32 +100,32 @@ public class EaseCallMemberView extends RelativeLayout {
         updateUserInfo();
     }
 
-    public void updateUserInfo(){
-        if(userInfo != null){
+    public void updateUserInfo() {
+        if (userInfo != null) {
             nameView.setVisibility(VISIBLE);
             nameView.setText(EaseCallKitUtils.getUserNickName(userInfo.getUserName()));
             headUrl = EaseCallKitUtils.getUserHeadImage(userInfo.getUserName());
-            if(headUrl != null){
+            if (headUrl != null) {
                 loadHeadImage();
-            }else{
+            } else {
                 avatarView.setImageResource(R.drawable.call_memberview_background);
             }
         }
     }
 
-    public EaseUserAccount getUserInfo(){
-        return  userInfo;
+    public EaseUserAccount getUserInfo() {
+        return userInfo;
     }
 
-    public String getUserAccount(){
-        if(userInfo != null){
+    public String getUserAccount() {
+        if (userInfo != null) {
             return userInfo.getUserName();
         }
         return null;
     }
 
-    public int getUserId(){
-        if(userInfo != null){
+    public int getUserId() {
+        if (userInfo != null) {
             return userInfo.getUid();
         }
         return 0;
@@ -137,7 +139,7 @@ public class EaseCallMemberView extends RelativeLayout {
      * 更新静音状态
      */
     public void setAudioOff(boolean state) {
-        if(!state) {
+        if (!state) {
             setVoiceOnlineImageState(false);
         }
         isAudioOff = state;
@@ -145,22 +147,35 @@ public class EaseCallMemberView extends RelativeLayout {
             return;
         }
         if (isAudioOff) {
-            audioOffView.setVisibility(VISIBLE);
-            audioOffView.setImageResource(R.drawable.ease_mic_level_off);
+            if (callType == EaseCallType.CONFERENCE_VOICE_CALL) {
+                audioOffInVoice.setVisibility(VISIBLE);
+                audioOffInVideo.setVisibility(GONE);
+                audioOffInVoice.setImageResource(R.drawable.ease_call_mic_off);
+            } else {
+                audioOffInVoice.setVisibility(GONE);
+                audioOffInVideo.setVisibility(VISIBLE);
+                audioOffInVideo.setImageResource(R.drawable.ease_call_mic_off_small);
+            }
         } else {
-            audioOffView.setVisibility(GONE);
-            audioOffView.setImageResource(R.drawable.ease_mic_level_on);
+            if (callType == EaseCallType.CONFERENCE_VOICE_CALL) {
+                audioOffInVoice.setVisibility(GONE);
+                audioOffInVideo.setVisibility(GONE);
+            } else {
+                audioOffInVoice.setVisibility(GONE);
+                audioOffInVideo.setVisibility(GONE);
+                audioOffInVideo.setImageResource(R.drawable.ease_call_mic_on);
+            }
         }
     }
 
-    public boolean getAudioOff(){
-        return  isAudioOff;
+    public boolean getAudioOff() {
+        return isAudioOff;
     }
 
-    public void setSpeak(boolean speak,int volume) {
-        if(speak&&volume>3) {
+    public void setSpeak(boolean speak, int volume) {
+        if (speak && volume > 3) {
             setVoiceOnlineImageState(true);
-        }else{
+        } else {
             setVoiceOnlineImageState(false);
         }
 
@@ -179,17 +194,19 @@ public class EaseCallMemberView extends RelativeLayout {
         if (!isShowVideo) {
             avatarView.setVisibility(View.GONE);
             surfaceViewLayout.setVisibility(VISIBLE);
+            ivVidicon.setVisibility(GONE);
         } else {
             avatarView.setVisibility(View.VISIBLE);
             surfaceViewLayout.setVisibility(GONE);
+            ivVidicon.setVisibility(VISIBLE);
         }
     }
 
-    public void setNameVisiable(int visiable){
+    public void setNameVisiable(int visiable) {
         nameView.setVisibility(visiable);
     }
 
-    public void setVidiconVisiable(int visiable){
+    public void setVidiconVisiable(int visiable) {
         ivVidicon.setVisibility(visiable);
     }
 
@@ -210,9 +227,9 @@ public class EaseCallMemberView extends RelativeLayout {
      */
     public void setUsername(String username) {
         headUrl = EaseCallKitUtils.getUserHeadImage(username);
-        if(headUrl != null){
+        if (headUrl != null) {
             avatarView.setImageResource(R.drawable.call_memberview_background);
-        }else{
+        } else {
             loadHeadImage();
         }
         nameView.setText(EaseCallKitUtils.getUserNickName(username));
@@ -235,11 +252,11 @@ public class EaseCallMemberView extends RelativeLayout {
         if (fullScreen) {
             talkingView.setVisibility(GONE);
             nameView.setVisibility(GONE);
-            audioOffView.setVisibility(GONE);
+            audioOffInVideo.setVisibility(GONE);
         } else {
             nameView.setVisibility(VISIBLE);
             if (isAudioOff) {
-                audioOffView.setVisibility(VISIBLE);
+                audioOffInVideo.setVisibility(VISIBLE);
             }
         }
     }
@@ -251,10 +268,11 @@ public class EaseCallMemberView extends RelativeLayout {
 
     /**
      * 加载用户配置头像
+     *
      * @return
      */
     private void loadHeadImage() {
-        setImage(getContext(),avatarView,headUrl);
+        setImage(getContext(), avatarView, headUrl);
     }
 
     public void setSpeakActivated(boolean activated) {
@@ -273,38 +291,38 @@ public class EaseCallMemberView extends RelativeLayout {
         return this.isCameraFront;
     }
 
-    public void setVoiceOnlineImageState(boolean show){
-        if(show) {
+    public void setVoiceOnlineImageState(boolean show) {
+        if (show) {
             avatarView.setBorderWidth(dp2px(3));
             avatarView.setBorderColor(Color.GREEN);
-        }else{
+        } else {
             avatarView.setBorderWidth(0);
             avatarView.setBorderColor(Color.TRANSPARENT);
         }
     }
+
     private int dp2px(int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 
     public void setCallType(EaseCallType callType) {
-        this.callType=callType;
-        if(callType==EaseCallType.CONFERENCE_VIDEO_CALL) {
-            ivVidicon.setVisibility(View.VISIBLE);
+        this.callType = callType;
+        if (callType == EaseCallType.CONFERENCE_VIDEO_CALL) {
             setVoiceOnlineImageState(false);
             //left
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone((ConstraintLayout) nameView.getParent());
-            constraintSet.connect(nameView.getId(),ConstraintSet.LEFT,ConstraintSet.PARENT_ID,ConstraintSet.LEFT,dp2px(10));
+            constraintSet.connect(nameView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, dp2px(10));
             constraintSet.applyTo((ConstraintLayout) nameView.getParent());
-        }else{
+        } else {
             ivVidicon.setVisibility(View.GONE);
             setVoiceOnlineImageState(false);
             //center
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone((ConstraintLayout) nameView.getParent());
-            constraintSet.connect(nameView.getId(),ConstraintSet.LEFT,ConstraintSet.PARENT_ID,ConstraintSet.LEFT);
-            constraintSet.connect(nameView.getId(),ConstraintSet.RIGHT,ConstraintSet.PARENT_ID,ConstraintSet.RIGHT);
-            constraintSet.connect(nameView.getId(),ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP);
+            constraintSet.connect(nameView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
+            constraintSet.connect(nameView.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
+            constraintSet.connect(nameView.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
             constraintSet.applyTo((ConstraintLayout) nameView.getParent());
         }
 

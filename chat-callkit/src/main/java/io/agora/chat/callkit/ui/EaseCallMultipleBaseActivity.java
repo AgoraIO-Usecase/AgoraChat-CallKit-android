@@ -755,7 +755,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         localMemberView.showVideo(videoOff);
         mRtcEngine.muteLocalVideoStream(videoOff);
         isVideoMute = videoOff;
-        mBinding.btnVidicon.setBackground(videoOff ? getResources().getDrawable(R.drawable.call_video_off) : getResources().getDrawable(R.drawable.ease_call_video_off));
+        mBinding.btnVidicon.setBackground(videoOff ? getResources().getDrawable(R.drawable.call_video_off) : getResources().getDrawable(R.drawable.call_video_on));
     }
 
     private void changeCameraDirect(boolean isFront) {
@@ -1223,14 +1223,13 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     }
                 });
 
-                final ChatMessage message = ChatMessage.createSendMessage(ChatMessage.Type.CMD);
-                String action = "rtcCall";
-                CmdMessageBody cmdBody = new CmdMessageBody(action);
-                message.setTo(username);
-                message.addBody(cmdBody);
-
+                final ChatMessage message ;
+                if (callType == EaseCallType.CONFERENCE_VIDEO_CALL) {
+                    message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invite_you_for_video_call), username);
+                } else {
+                    message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invite_you_for_audio_call), username);
+                }
                 setInviteeMessageAttr(message);
-
                 ChatClient.getInstance().chatManager().sendMessage(message);
             }
         }
@@ -1545,6 +1544,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
     private void insertCancelMessageToLocal() {
         final ChatMessage message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invited_to_make_multi_party_call), groupId);
+        message.setUnread(false);
         message.setAttribute(EaseCallMsgUtils.CALL_ACTION, EaseCallAction.CALL_CANCEL.state);
         message.setAttribute(EaseCallMsgUtils.CALL_TYPE, callType.code);
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);

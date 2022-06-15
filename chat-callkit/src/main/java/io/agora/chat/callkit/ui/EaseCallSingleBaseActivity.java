@@ -108,7 +108,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     private View rootView;
     private boolean isMuteVoice = false;
-    private boolean isHandsfreeState;
+    private boolean isSpeakerOn;
     // Determine whether to initiate or to be invited
     protected boolean isInComingCall;
     // Judge whether is ongoing call
@@ -154,10 +154,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    isHandsfreeState = true;
-                    EaseCallAudioControl.getInstance().openSpeakerOn();
                     if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VOICE_CALL) {
-                        mBinding.ivHandsfree.setImageResource(R.drawable.em_icon_speaker_on);
+                        setSpeakerMode(false);
+                    }else{
+                        setSpeakerMode(true);
                     }
                     if (!isInComingCall) {
                         //send invite message (发送邀请信息)
@@ -231,7 +231,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     startCount();
                     if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VOICE_CALL) {
                         mBinding.llVoiceCallingControl.setVisibility(View.VISIBLE);
-                        mBinding.ivHandsfree.setImageResource(R.drawable.em_icon_speaker_on);
                     }
                 }
             });
@@ -384,7 +383,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         mBinding.btnHangupCall.setOnClickListener(this);
         mBinding.btnVideoHangupCall.setOnClickListener(this);
         mBinding.ivMute.setOnClickListener(this);
-        mBinding.ivHandsfree.setOnClickListener(this);
+        mBinding.ivSpeaker.setOnClickListener(this);
         mBinding.btnSwitchCamera.setOnClickListener(this);
         mBinding.btnRefuseVideoCalled.setOnClickListener(this);
         mBinding.btnAnswerVideoCalled.setOnClickListener(this);
@@ -427,6 +426,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
     }
 
+
     private void initEngine() {
         initializeEngine();
         setupVideoConfig();
@@ -447,6 +447,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             mBinding.llComingCallVoice.setVisibility(View.VISIBLE);
             mBinding.ivAvatar.setVisibility(View.VISIBLE);
             mBinding.tvNick.setVisibility(View.VISIBLE);
+            mBinding.tvCallStateVoice.setVisibility(View.VISIBLE);
             mBinding.tvCallStateVoice.setText(getString(R.string.ease_call_voice_call));
         }
         mBinding.llVoiceCallingControl.setVisibility(View.GONE);
@@ -486,7 +487,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             mBinding.llVideoCallingHead.setVisibility(View.GONE);
             mBinding.llVoiceCallingHead.setVisibility(View.VISIBLE);
             mBinding.tvNickVoice.setText(EaseCallKitUtils.getUserNickName(username));
-            mBinding.tvCallStateVoice.setText(getApplicationContext().getString(R.string.ease_call_in_the_call));
+            mBinding.tvCallStateVoice.setVisibility(View.GONE);
         }
 
         mBinding.btnVideoTranse.setVisibility(View.GONE);
@@ -501,6 +502,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             mBinding.llVoiceCallingControl.setVisibility(View.VISIBLE);
             mBinding.llVideoCallingHead.setVisibility(View.GONE);
             mBinding.llVoiceCallingHead.setVisibility(View.VISIBLE);
+            mBinding.tvCallStateVoice.setVisibility(View.VISIBLE);
             mBinding.tvCallStateVoice.setText(getApplicationContext().getString(R.string.ease_call_calling));
         } else {
             mBinding.llVoiceCallingControl.setVisibility(View.GONE);
@@ -643,16 +645,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 mRtcEngine.muteLocalAudioStream(true);
                 isMuteVoice = true;
             }
-        } else if (id == R.id.iv_handsfree) { // handsfree
-            if (isHandsfreeState) {
-                mBinding.ivHandsfree.setImageResource(R.drawable.em_icon_speaker_normal);
-                EaseCallAudioControl.getInstance().closeSpeakerOn();
-                isHandsfreeState = false;
-            } else {
-                mBinding.ivHandsfree.setImageResource(R.drawable.em_icon_speaker_on);
-                EaseCallAudioControl.getInstance().openSpeakerOn();
-                isHandsfreeState = true;
-            }
+        } else if (id == R.id.iv_speaker) { // handsfree
+            setSpeakerMode(!isSpeakerOn);
         } else if (id == R.id.btn_switch_camera) {
             changeCameraDirection(!isCameraFront);
         } else if (id == R.id.btn_voice_trans) {
@@ -668,9 +662,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 callType = EaseCallType.SINGLE_VOICE_CALL;
                 EaseCallKit.getInstance().setCallType(EaseCallType.SINGLE_VOICE_CALL);
                 EaseCallFloatWindow.getInstance(getApplicationContext()).setCallType(callType);
-                isHandsfreeState = true;
-                EaseCallAudioControl.getInstance().openSpeakerOn();
-                mBinding.ivHandsfree.setImageResource(R.drawable.em_icon_speaker_on);
+                setSpeakerMode(true);
+                mBinding.ivSpeaker.setImageResource(R.drawable.em_icon_speaker_on);
                 changeVideoVoiceState();
                 if (mRtcEngine != null) {
                     mRtcEngine.muteLocalVideoStream(true);
@@ -760,6 +753,22 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
     }
 
+    private void setSpeakerMode( boolean isSpeakerOn) {
+        this.isSpeakerOn=isSpeakerOn;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (isSpeakerOn) {
+                    mBinding.ivSpeaker.setImageResource(R.drawable.em_icon_speaker_on);
+                    EaseCallAudioControl.getInstance().openSpeakerOn();
+                } else {
+                    mBinding.ivSpeaker.setImageResource(R.drawable.em_icon_speaker_normal);
+                    EaseCallAudioControl.getInstance().closeSpeakerOn();
+                }
+            }
+        });
+    }
+
 
     private void updateViewWithCameraStatus() {
         if (isLocalVideoMuted && isRemoteVideoMuted) {
@@ -771,7 +780,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             String userHeadImage = EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser());
             setViewGaussianBlur(mBinding.rootLayout, userHeadImage);
             mBinding.llVoiceCallingHead.setVisibility(View.VISIBLE);
-            mBinding.tvCallStateVoice.setText(mBinding.chronometer.getContentDescription());
+//            mBinding.tvCallStateVoice.setText(mBinding.chronometer.getContentDescription());
             setImage(this, mBinding.ivAvatarVoice, headUrl);
         } else if (isLocalVideoMuted && !isRemoteVideoMuted) {
             //Local disabled The remote camera is not disabled(本地关闭远端没有关闭摄像头)
@@ -906,11 +915,11 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             if (EaseCallKit.getInstance().getCallState() == EaseCallState.CALL_ANSWERED) {
                 //voice ui visiable (语音通话UI可见)
                 mBinding.ivAvatar.setVisibility(View.VISIBLE);
-                mBinding.tvCallStateVoice.setText(getApplicationContext().getString(R.string.ease_call_in_the_call));
                 makeOngoingStatus();
             } else {
                 mBinding.localSurfaceLayout.setVisibility(View.GONE);
                 mBinding.oppositeSurfaceLayout.setVisibility(View.GONE);
+                mBinding.tvCallStateVoice.setVisibility(View.VISIBLE);
                 //Set gaussian blur background(设置高斯模糊背景)
                 setViewGaussianBlur(rootView, EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser()));
 

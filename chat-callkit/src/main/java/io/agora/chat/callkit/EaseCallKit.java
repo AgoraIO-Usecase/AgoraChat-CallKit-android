@@ -3,7 +3,6 @@ package io.agora.chat.callkit;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static io.agora.chat.callkit.general.EaseCallError.PROCESS_ERROR;
 import static io.agora.chat.callkit.general.EaseCallProcessError.CALL_PARAM_ERROR;
-import static io.agora.chat.callkit.general.EaseCallType.CONFERENCE_VIDEO_CALL;
 import static io.agora.chat.callkit.general.EaseCallType.CONFERENCE_VOICE_CALL;
 import static io.agora.chat.callkit.general.EaseCallType.SINGLE_VOICE_CALL;
 import static io.agora.chat.callkit.utils.EaseCallKitUtils.bring2Front;
@@ -513,10 +512,6 @@ public class EaseCallKit {
                                 int calltype = message.getIntAttribute
                                         (EaseCallMsgUtils.CALL_TYPE, 0);
                                 EaseCallType callkitType = EaseCallType.getfrom(calltype);
-                                if (callkitType == CONFERENCE_VOICE_CALL || callkitType == CONFERENCE_VIDEO_CALL) {
-                                    // Group chat invitation messages are handled by CMD invitation messages
-                                    break;
-                                }
                                 if (callState != EaseCallState.CALL_IDLE) {
                                     if (TextUtils.equals(fromCallId, callID) && TextUtils.equals(fromUser, fromUserId)
                                             && callkitType == SINGLE_VOICE_CALL && callType == EaseCallType.SINGLE_VIDEO_CALL) {
@@ -563,7 +558,6 @@ public class EaseCallKit {
                     }
                 }
             }
-
             @Override
             public void onCmdMessageReceived(List<ChatMessage> messages) {
                 for (ChatMessage message : messages) {
@@ -715,50 +709,6 @@ public class EaseCallKit {
 
                                         EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString()).postValue(inviteEvent);
                                     }
-                                }
-                                break;
-
-                            case CALL_INVITE: // Received a call invitation
-                                int calltype = message.getIntAttribute
-                                        (EaseCallMsgUtils.CALL_TYPE, 0);
-                                EaseCallType callkitType =
-                                        EaseCallType.getfrom(calltype);
-                                if (callState != EaseCallState.CALL_IDLE) {
-                                    if (TextUtils.equals(fromCallId, callID) && TextUtils.equals(fromUser, fromUserId)
-                                            && callkitType == SINGLE_VOICE_CALL && callType == EaseCallType.SINGLE_VIDEO_CALL) {
-                                        EaseCallInviteEventEase inviteEvent = new EaseCallInviteEventEase();
-                                        inviteEvent.callId = fromCallId;
-                                        inviteEvent.type = callkitType;
-
-                                        EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString()).postValue(inviteEvent);
-                                    } else {
-                                        // Send busy status
-                                        EaseCallAnswerEvent callEvent = new EaseCallAnswerEvent();
-                                        callEvent.result = EaseCallMsgUtils.CALL_ANSWER_BUSY;
-                                        callEvent.callerDevId = callerDevId;
-                                        callEvent.callId = fromCallId;
-                                        sendCmdMsg(callEvent, fromUser);
-                                    }
-                                } else {
-                                    callInfo.setCallerDevId(callerDevId);
-                                    callInfo.setCallId(fromCallId);
-                                    callInfo.setCallKitType(callkitType);
-                                    callInfo.setChannelName(channel);
-                                    callInfo.setComming(true);
-                                    callInfo.setFromUser(fromUser);
-                                    callInfo.setExt(ext);
-
-                                    // Add the invitation information to the list
-                                    callInfoMap.put(fromCallId, callInfo);
-
-                                    // Send an alert message
-                                    EaseCallAlertEvent callEvent = new EaseCallAlertEvent();
-                                    callEvent.callerDevId = callerDevId;
-                                    callEvent.callId = fromCallId;
-                                    sendCmdMsg(callEvent, fromUser);
-
-                                    // Start timer
-                                    timeHandler.startTime();
                                 }
                                 break;
                             default:

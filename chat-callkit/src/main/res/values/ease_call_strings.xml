@@ -31,7 +31,7 @@
     <string name="ease_call_camera">Camera</string>
     <string name="ease_call_calling">Calling……</string>
     <string name="ease_call_make_sure_leave">Are you sure you want to leave the current conversation?</string>
-    <string name="ease_call_invited_to_make_multi_party_call">invited you to a voice/video conference call</string>
+    <string name="ease_call_invited_to_make_multi_party_call">Start a video/voice call</string>
     <string name="ease_call_in_the_call">Call in progress</string>
     <string name="ease_call_invite_you_for_video_call">Start a video call</string>
     <string name="ease_call_invite_you_for_audio_call">Start a voice call</string>

@@ -29,7 +29,7 @@
         android:id="@+id/csl_mute_smallview"
         android:layout_width="84dp"
         android:layout_height="84dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="90dp"
         android:layout_marginRight="18dp"
         android:background="@drawable/call_shape_gray_70_000000_corner12"
         android:visibility="gone"
@@ -175,7 +175,7 @@
         android:src="@drawable/call_mute_normal"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/iv_handsfree"
+        app:layout_constraintLeft_toRightOf="@id/iv_speaker"
         app:layout_constraintRight_toLeftOf="@id/btn_hangup_call" />
 
     <TextView
@@ -192,7 +192,7 @@
         app:layout_constraintTop_toBottomOf="@id/iv_mute" />
 
     <ImageView
-        android:id="@+id/iv_handsfree"
+        android:id="@+id/iv_speaker"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginLeft="37dp"
@@ -216,9 +216,9 @@
         android:text="@string/ease_call_hands_free"
         android:textColor="@color/white"
         android:visibility="gone"
-        app:layout_constraintLeft_toLeftOf="@id/iv_handsfree"
-        app:layout_constraintRight_toRightOf="@id/iv_handsfree"
-        app:layout_constraintTop_toBottomOf="@id/iv_handsfree" />
+        app:layout_constraintLeft_toLeftOf="@id/iv_speaker"
+        app:layout_constraintRight_toRightOf="@id/iv_speaker"
+        app:layout_constraintTop_toBottomOf="@id/iv_speaker" />
 
     <RelativeLayout
         android:id="@+id/btn_video_transe"
@@ -596,7 +596,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="btn_hangup_call,iv_mute,iv_handsfree" />
+        app:constraint_referenced_ids="btn_hangup_call,iv_mute,iv_speaker" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/ll_video_calling_out_and_ongoing_control"

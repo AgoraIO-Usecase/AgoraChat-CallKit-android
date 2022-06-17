@@ -1,1 +1,1 @@
-include ':app', ':ease-call-kit'
+include ':app', ':chat-callkit'

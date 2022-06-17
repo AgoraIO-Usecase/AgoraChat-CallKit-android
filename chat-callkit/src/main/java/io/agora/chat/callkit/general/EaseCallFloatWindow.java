@@ -80,6 +80,7 @@ public class EaseCallFloatWindow {
     };
     private TextView tvTime;
     private boolean isRemoteVideoMuted;
+    private String currentInstanceName;
 
     public EaseCallFloatWindow(Context context) {
         initFloatWindow(context);
@@ -125,7 +126,8 @@ public class EaseCallFloatWindow {
     }
 
     private void initFloatWindow(Context context) {
-        this.context = context;
+        currentInstanceName =context.toString();
+        this.context = context.getApplicationContext();
         windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
         windowManager.getDefaultDisplay().getSize(point);
@@ -337,6 +339,9 @@ public class EaseCallFloatWindow {
      * @param surface
      */
     public void update(boolean isSelf,String remoteUrl, int curUid, int remoteUid, boolean surface) {
+        if (floatView == null) {
+            return;
+        }
         if(singleCallInfo == null) {
             singleCallInfo = new SingleCallInfo();
         }
@@ -407,6 +412,15 @@ public class EaseCallFloatWindow {
             singleCallInfo = null;
         }
         handler.removeCallbacksAndMessages(null);
+        currentInstanceName=null;
+    }
+
+    public void resetCurrentInstance(){
+        currentInstanceName=null;
+    }
+
+    public String getCurrentInstance(){
+        return currentInstanceName;
     }
 
     /**

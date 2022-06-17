@@ -8,6 +8,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
@@ -196,6 +197,10 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
 
     @Override
     public void addView(View child) {
+        ViewParent parent = child.getParent();
+        if(parent!=null) {
+            ((ViewGroup)parent).removeView(child);
+        }
         super.addView(child);
         if (isFullScreenMode()) {
             EMLog.i(TAG, "addView, isFullScreenMode: " + isFullScreenMode());

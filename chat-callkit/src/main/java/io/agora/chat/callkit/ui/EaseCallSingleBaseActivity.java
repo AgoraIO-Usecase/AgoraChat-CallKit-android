@@ -156,7 +156,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 public void run() {
                     if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VOICE_CALL) {
                         setSpeakerMode(false);
-                    }else{
+                    } else {
                         setSpeakerMode(true);
                     }
                     if (!isInComingCall) {
@@ -556,10 +556,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             return;
         }
         updateOppositeSurfaceLayoutUid(0);
-        if(isInComingCall) {
-           if(callType==EaseCallType.SINGLE_VIDEO_CALL) {
-               mRtcEngine.startPreview();
-           }
+        if (isInComingCall) {
+            if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
+                mRtcEngine.startPreview();
+            }
         }
     }
 
@@ -583,9 +583,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     exitChannel();
                 }
             });
-        }else{
+        } else {
             //Don't checkout token(不校验token)
-            mRtcEngine.joinChannel(null, channelName,  null,0);
+            mRtcEngine.joinChannel(null, channelName, null, 0);
             //add uid to inChannelAccounts
             inChannelAccounts.put(0, new EaseUserAccount(0, ChatClient.getInstance().getCurrentUser()));
         }
@@ -720,7 +720,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             if (isOngoingCall) {
                 updateViewWithCameraStatus();
             } else {
-                if(isInComingCall) {
+                if (isInComingCall) {
                     if (isLocalVideoMuted) {
                         String userHeadImage = EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser());
                         setViewGaussianBlur(mBinding.rootLayout, userHeadImage);
@@ -728,7 +728,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     } else {
                         mBinding.oppositeSurfaceLayout.setVisibility(View.VISIBLE);
                     }
-                }else{
+                } else {
                     if (isLocalVideoMuted) {
                         String userHeadImage = EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser());
                         setViewGaussianBlur(mBinding.rootLayout, userHeadImage);
@@ -753,8 +753,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
     }
 
-    private void setSpeakerMode( boolean isSpeakerOn) {
-        this.isSpeakerOn=isSpeakerOn;
+    private void setSpeakerMode(boolean isSpeakerOn) {
+        this.isSpeakerOn = isSpeakerOn;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -811,9 +811,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             updateOppositeSurfaceLayoutUid(remoteUId);
             updateLocalSurfaceLayoutUid(0);
         }
-        if(isFloatWindowShowing()) {
+        if (isFloatWindowShowing()) {
             EaseCallFloatWindow.getInstance().setRemoteVideoMuted(isRemoteVideoMuted);
-            EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl,0, remoteUId, true);
+            EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl, 0, remoteUId, true);
         }
     }
 
@@ -967,7 +967,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         break;
                     case CALL_CANCEL:
 
-                        if(!TextUtils.equals(event.userId,username)&&!TextUtils.equals(event.userId,ChatClient.getInstance().getCurrentUser())) {
+                        if (!TextUtils.equals(event.userId, username) && !TextUtils.equals(event.userId, ChatClient.getInstance().getCurrentUser())) {
                             //An event sent by a strange third party(陌生的第三者发的event)
                             break;
                         }
@@ -1213,7 +1213,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
 
-
     private void sendCmdMsg(EaseCallBaseEvent event, String username) {
         EaseCallKit.getInstance().sendCmdMsg(event, username, new CallBack() {
             @Override
@@ -1357,7 +1356,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 long intervalTime;
                 EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
                 if (callKitConfig != null) {
-                    intervalTime = callKitConfig.getCallTimeOut()*1000;
+                    intervalTime = callKitConfig.getCallTimeOut() * 1000;
                 } else {
                     intervalTime = EaseCallMsgUtils.CALL_INVITE_INTERVAL;
                 }
@@ -1412,12 +1411,12 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
      * @param uid
      */
     private void setUserJoinChannelInfo(String userName, int uid) {
-        if(TextUtils.isEmpty(userName)) {
+        if (TextUtils.isEmpty(userName)) {
             if (listener != null) {
                 listener.onRemoteUserJoinChannel(channelName, userName, uid, new EaseCallGetUserAccountCallback() {
                     @Override
                     public void onUserAccount(EaseUserAccount userAccount) {
-                        processOnUserAccount( userAccount);
+                        processOnUserAccount(userAccount);
                     }
 
                     @Override
@@ -1426,14 +1425,14 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     }
                 });
             }
-        }else{
+        } else {
             EaseUserAccount userAccount = new EaseUserAccount(uid, userName);
-            processOnUserAccount( userAccount);
+            processOnUserAccount(userAccount);
         }
     }
 
     private void processOnUserAccount(EaseUserAccount userAccount) {
-        if(userAccount!=null) {
+        if (userAccount != null) {
             inChannelAccounts.put(userAccount.getUid(), userAccount);
             notifyUserToUpdateUserInfo(userAccount.getUserName());
         }
@@ -1465,6 +1464,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             public void run() {
                 EaseCallAudioControl.getInstance().stopPlayRing();
                 isOngoingCall = false;
+                //Note that it cannot be placed directly in the life cycle function, so as to avoid the impact of the previous instance's delayed release on this instance （注意不能直接放在生命周期函数里，避免上个实例延迟释放对本实例产生影响）
+                EaseCallKit.getInstance().releaseCall();
+                RtcEngine.destroy();
+
                 finish();
             }
         });
@@ -1478,6 +1481,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 EMLog.i(TAG, "exit channel channelName: " + channelName);
                 if (isFloatWindowShowing()) {
                     EaseCallFloatWindow.getInstance(getApplicationContext()).dismiss();
+                }else{
+                    EaseCallFloatWindow.getInstance().resetCurrentInstance();
                 }
                 //A hang up message was inserted locally during a group chat message(群聊消息时，本地插入一条挂断消息)
                 insertCancelMessageToLocal();
@@ -1555,7 +1560,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         if (isInComingCall && EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_ANSWERED) {
             surface = false;
         }
-        EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl,0, remoteUId, surface);
+        EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl, 0, remoteUId, surface);
         EaseCallFloatWindow.getInstance().setCameraDirection(isCameraFront, changeFlag);
         moveTaskToBack(false);
     }
@@ -1608,12 +1613,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         if (inChannelAccounts != null) {
             inChannelAccounts.clear();
         }
-        if (!isFloatWindowShowing()) {
-            EaseCallKit.getInstance().releaseCall();
 
-            leaveChannel();
-            RtcEngine.destroy();
-        }
     }
 
     @Override

@@ -1531,6 +1531,8 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 }
                 if (isFloatWindowShowing()) {
                     EaseCallFloatWindow.getInstance().dismiss();
+                }else{
+                    EaseCallFloatWindow.getInstance().resetCurrentInstance();
                 }
                 //insert a hangup message to local when in group chat (群聊消息时，本地插入一条挂断消息)
                 insertCancelMessageToLocal();
@@ -1755,9 +1757,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             if (inChannelAccounts != null) {
                 inChannelAccounts.clear();
             }
-            EaseCallKit.getInstance().releaseCall();
             leaveChannel();
-            RtcEngine.destroy();
+            //Avoid the effect of last instance delay release on this instance（避免上个实例延迟释放对本实例产生影响）
+            if(TextUtils.equals(EaseCallFloatWindow.getInstance().getCurrentInstance(),this.toString())) {
+                EaseCallKit.getInstance().releaseCall();
+                RtcEngine.destroy();
+            }
         }
     }
 

@@ -781,6 +781,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             setViewGaussianBlur(mBinding.rootLayout, userHeadImage);
             mBinding.llVoiceCallingHead.setVisibility(View.VISIBLE);
 //            mBinding.tvCallStateVoice.setText(mBinding.chronometer.getContentDescription());
+            mBinding.tvCallStateVoice.setText("");
             setImage(this, mBinding.ivAvatarVoice, headUrl);
         } else if (isLocalVideoMuted && !isRemoteVideoMuted) {
             //Local disabled The remote camera is not disabled(本地关闭远端没有关闭摄像头)

@@ -12,8 +12,6 @@
         <!-- Customize text color hint -->
         <item name="android:textColorHint">@color/em_base_color_text_hint</item>
         <item name="android:windowBackground">@color/em_base_color_window_bg</item>
-        <!-- remove button default shadow effect -->
-        <item name="android:buttonStyle">@style/Button.BorderLess</item>
     </style>
 
     <style name="NoActionBar.Dark" parent="Theme.AppCompat.NoActionBar">

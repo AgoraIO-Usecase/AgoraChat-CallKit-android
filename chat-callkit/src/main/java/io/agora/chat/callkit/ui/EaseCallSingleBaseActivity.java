@@ -1,7 +1,5 @@
 package io.agora.chat.callkit.ui;
 
-import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceAgreed;
-import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceRefused;
 import static io.agora.chat.callkit.utils.EaseCallImageUtil.setBgRadius;
 import static io.agora.chat.callkit.utils.EaseCallImageUtil.setImage;
 import static io.agora.chat.callkit.utils.EaseCallImageUtil.setViewGaussianBlur;
@@ -748,8 +746,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             }
             joinChannel();
         } else if (id == R.id.iv_call_close) {
-            EaseCallAudioControl.getInstance().stopPlayRing();
-            finish();
+            resetState();
         }
     }
 
@@ -1053,38 +1050,17 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         timehandler.stopTime();
                         //is self device (收到的仲裁为自己设备)
                         if (TextUtils.equals(deviceId, EaseCallKit.deviceId)) {
-
                             //The received arbitration is an answer(收到的仲裁为接听)
                             if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
                                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
                                 joinChannel();
                                 makeOngoingStatus();
-
                             } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
                                 exitChannel();
                             }
                         } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //The message is processed on another device(提示已在其他设备处理)
-                                    EaseCallEndReason reason = null;
-                                    if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                                        //agreed in another device 已经在其他设备接听
-                                        reason = EaseCallEndReasonHandleOnOtherDeviceAgreed;
-                                    } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
-                                        //refused in another device 已经在其他设备拒绝
-                                        reason = EaseCallEndReasonHandleOnOtherDeviceRefused;
-                                    }
-                                    exitChannel();
-                                    if (listener != null) {
-                                        //It has been processed in other devices(已经在其他设备处理)
-                                        listener.onEndCallWithReason(callType, channelName, reason, 0);
-                                    }
-                                }
-                            });
+                            exitChannel();
                         }
-
                         break;
                 }
             }
@@ -1255,7 +1231,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                             });
                             //show recall view (显示recall页面)
                             showRedialView();
-
                         } else {
                             resetState();
                         }
@@ -1315,7 +1290,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 if (isFloatWindowShowing()) {
                     EaseCallFloatWindow.getInstance(getApplicationContext()).dismiss();
                 }
-                //A hang up message was inserted locally during a group chat message(群聊消息时，本地插入一条挂断消息)
                 insertCancelMessageToLocal();
                 //reset state 重置状态
                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
@@ -1464,7 +1438,12 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             public void run() {
                 EaseCallAudioControl.getInstance().stopPlayRing();
                 isOngoingCall = false;
+
                 //Note that it cannot be placed directly in the life cycle function, so as to avoid the impact of the previous instance's delayed release on this instance （注意不能直接放在生命周期函数里，避免上个实例延迟释放对本实例产生影响）
+                //reset state 重置状态
+                releaseHandler();
+                EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
+                EaseCallKit.getInstance().setCallID(null);
                 EaseCallKit.getInstance().releaseCall();
                 RtcEngine.destroy();
 
@@ -1484,11 +1463,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 }else{
                     EaseCallFloatWindow.getInstance().resetCurrentInstance();
                 }
-                //A hang up message was inserted locally during a group chat message(群聊消息时，本地插入一条挂断消息)
                 insertCancelMessageToLocal();
-                //reset state 重置状态
-                EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
-                EaseCallKit.getInstance().setCallID(null);
                 resetState();
             }
         });
@@ -1599,7 +1574,12 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
      * stop event loop (停止事件循环)
      */
     protected void releaseHandler() {
-        handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        if(handler!=null) {
+            handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        }
+        if (timehandler != null) {
+            timehandler.stopTime();
+        }
     }
 
     @Override
@@ -1607,13 +1587,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         EMLog.d(TAG, "onDestroy");
         super.onDestroy();
         releaseHandler();
-        if (timehandler != null) {
-            timehandler.stopTime();
-        }
         if (inChannelAccounts != null) {
             inChannelAccounts.clear();
         }
-
     }
 
     @Override

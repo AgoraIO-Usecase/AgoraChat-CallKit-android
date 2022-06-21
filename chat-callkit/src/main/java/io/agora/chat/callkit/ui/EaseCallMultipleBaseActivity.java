@@ -1,7 +1,5 @@
 package io.agora.chat.callkit.ui;
 
-import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceAgreed;
-import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceRefused;
 import static io.agora.chat.callkit.general.EaseCallError.PROCESS_ERROR;
 import static io.agora.chat.callkit.general.EaseCallProcessError.CALL_PARAM_ERROR;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.CALL_INVITE_EXT;
@@ -921,31 +919,10 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                             } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
                                 //exit call
                                 exitChannel();
-                                if (listener != null) {
-                                    listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRefuse, 0);
-                                }
                             }
                         } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //handled in another device (提示已在其他设备处理)
-                                    EaseCallEndReason reason = null;
-                                    if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                                        //agreed in another device (已经在其他设备接听)
-                                        reason = EaseCallEndReasonHandleOnOtherDeviceAgreed;
-                                    } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
-                                        //refused in another device(已经在其他设备拒绝)
-                                        reason = EaseCallEndReasonHandleOnOtherDeviceRefused;
-                                    }
-                                    //exit call(退出通话)
-                                    exitChannel();
-                                    if (listener != null) {
-                                        //handled in another device(已经在其他设备处理)
-                                        listener.onEndCallWithReason(callType, channelName, reason, 0);
-                                    }
-                                }
-                            });
+                            //exit call(退出通话)
+                            exitChannel();
                         }
                         break;
                 }
@@ -1537,8 +1514,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 //insert a hangup message to local when in group chat (群聊消息时，本地插入一条挂断消息)
                 insertCancelMessageToLocal();
                 //reset state (重置状态)
+                releaseHandler();
                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
                 EaseCallKit.getInstance().setCallID(null);
+                EaseCallKit.getInstance().releaseCall();
+                RtcEngine.destroy();
                 finish();
             }
         });
@@ -1733,7 +1713,15 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
 
     protected void releaseHandler() {
-        handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        if(handler!=null) {
+            handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        }
+        if (timeHandler != null) {
+            timeHandler.stopTime();
+        }
+        if (timeUpdataTimer != null) {
+            timeUpdataTimer.stopTime();
+        }
     }
 
     @Override
@@ -1741,12 +1729,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         super.onDestroy();
         mBinding.surfaceViewGroup.removeAllViews();
         releaseHandler();
-        if (timeHandler != null) {
-            timeHandler.stopTime();
-        }
-        if (timeUpdataTimer != null) {
-            timeUpdataTimer.stopTime();
-        }
         if (inChannelViews != null) {
             inChannelViews.clear();
         }

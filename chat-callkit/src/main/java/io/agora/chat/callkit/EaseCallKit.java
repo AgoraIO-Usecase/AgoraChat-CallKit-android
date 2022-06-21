@@ -1,6 +1,8 @@
 package io.agora.chat.callkit;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceAgreed;
+import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceRefused;
 import static io.agora.chat.callkit.general.EaseCallError.PROCESS_ERROR;
 import static io.agora.chat.callkit.general.EaseCallProcessError.CALL_PARAM_ERROR;
 import static io.agora.chat.callkit.general.EaseCallType.CONFERENCE_VOICE_CALL;
@@ -55,6 +57,7 @@ import io.agora.chat.callkit.event.EaseCallConfirmCallEvent;
 import io.agora.chat.callkit.event.EaseCallConfirmRingEvent;
 import io.agora.chat.callkit.event.EaseCallInviteEventEase;
 import io.agora.chat.callkit.general.EaseCallAction;
+import io.agora.chat.callkit.general.EaseCallEndReason;
 import io.agora.chat.callkit.general.EaseCallError;
 import io.agora.chat.callkit.general.EaseCallFloatWindow;
 import io.agora.chat.callkit.general.EaseCallKitConfig;
@@ -509,8 +512,10 @@ public class EaseCallKit {
                         EaseCallAction callAction = EaseCallAction.getfrom(action);
                         switch (callAction) {
                             case CALL_INVITE: // Received a call invitation
-                                int calltype = message.getIntAttribute
-                                        (EaseCallMsgUtils.CALL_TYPE, 0);
+                                if(message.getChatType()== ChatMessage.ChatType.GroupChat) {
+                                    return;
+                                }
+                                int calltype = message.getIntAttribute(EaseCallMsgUtils.CALL_TYPE, 0);
                                 EaseCallType callkitType = EaseCallType.getfrom(calltype);
                                 if (callState != EaseCallState.CALL_IDLE) {
                                     if (TextUtils.equals(fromCallId, callID) && TextUtils.equals(fromUser, fromUserId)
@@ -660,9 +665,29 @@ public class EaseCallKit {
                                 event.callId = fromCallId;
                                 event.userId = fromUser;
 
-                                if (!TextUtils.equals(calledDevId, EaseCallKit.deviceId)) {
+                                //is self (收到的仲裁为自己设备)
+                                if (TextUtils.equals(calledDevId, EaseCallKit.deviceId)) {
+                                    if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
+                                        if (callListener != null) {
+                                            callListener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRefuse, 0);
+                                        }
+                                    }
+                                } else {
                                     hideCallingHeadDialog();
                                     resetState();
+                                    //handled in another device (提示已在其他设备处理)
+                                    EaseCallEndReason reason = null;
+                                    if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
+                                        //agreed in another device (已经在其他设备接听)
+                                        reason = EaseCallEndReasonHandleOnOtherDeviceAgreed;
+                                    } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
+                                        //refused in another device(已经在其他设备拒绝)
+                                        reason = EaseCallEndReasonHandleOnOtherDeviceRefused;
+                                    }
+                                    if (callListener != null) {
+                                        //handled in another device(已经在其他设备处理)
+                                        callListener.onEndCallWithReason(callType, channelName, reason, 0);
+                                    }
                                 }
                                 //publis the message
                                 EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString()).postValue(event);

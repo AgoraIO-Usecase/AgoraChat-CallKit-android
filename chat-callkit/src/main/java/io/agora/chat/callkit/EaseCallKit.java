@@ -597,6 +597,8 @@ public class EaseCallKit {
                                     timeHandler.stopTime();
                                     // Cancel calling
                                     callInfoMap.remove(fromCallId);
+                                    hideCallingHeadDialog();
+                                    resetState();
                                 } else {
                                     EaseCallCallCancelEvent event = new EaseCallCallCancelEvent();
                                     event.callerDevId = callerDevId;
@@ -604,13 +606,14 @@ public class EaseCallKit {
                                     event.userId = fromUser;
                                     if (TextUtils.equals(callID, fromCallId)) {
                                         callState = EaseCallState.CALL_IDLE;
+                                        hideCallingHeadDialog();
+                                        resetState();
                                     }
                                     notifier.reset();
                                     //publish the message
                                     EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString()).postValue(event);
                                 }
-                                hideCallingHeadDialog();
-                                resetState();
+
                                 break;
                             case CALL_ALERT:
                                 String calleedDeviceId = message.getStringAttribute(EaseCallMsgUtils.CALLED_DEVICE_ID, "");
@@ -655,7 +658,11 @@ public class EaseCallKit {
                                 }
 
                                 break;
-                            case CALL_CONFIRM_CALLEE:  // Received the arbitration message
+                            case CALL_CONFIRM_CALLEE:
+                                if(!TextUtils.equals(callID,fromCallId)) {
+                                    break;
+                                }
+                                // Received the arbitration message
                                 String result = message.getStringAttribute(EaseCallMsgUtils.CALL_RESULT, "");
                                 String calledDevId = message.getStringAttribute(EaseCallMsgUtils.CALLED_DEVICE_ID, "");
                                 EaseCallConfirmCallEvent event = new EaseCallConfirmCallEvent();

@@ -259,13 +259,13 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         userIdAndUidMap.remove(account.getUserName());
                     }
 
-                    int uid = 0;
+                    int tempUid = 0;
                     if (inChannelViews.size() > 0) { // If there are other members in the room, the first member is displayed（如果会议中有其他成员,则显示第一个成员）
                         Set<Integer> uidSet = inChannelViews.keySet();
                         for (int id : uidSet) {
-                            uid = id;
+                            tempUid = id;
                         }
-                        updateFloatWindow(inChannelViews.get(uid));
+                        updateFloatWindow(inChannelViews.get(tempUid));
                     }
 
                     if (inChannelAccounts != null) {
@@ -1207,6 +1207,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invite_you_for_audio_call), username);
                 }
                 setInviteeMessageAttr(message);
+
                 ChatClient.getInstance().chatManager().sendMessage(message);
             }
         }
@@ -1251,10 +1252,29 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             extObject.putOpt("em_push_content", info);
             extObject.putOpt("isRtcCall", true);
             extObject.putOpt("callType", EaseCallType.CONFERENCE_VIDEO_CALL.code);
+
+            if(message.getChatType()== ChatMessage.ChatType.Chat) {
+                extObject.putOpt("em_push_type", "voip");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         message.setAttribute("em_apns_ext", extObject);
+
+        if(message.getChatType()== ChatMessage.ChatType.Chat) {
+            try {
+                JSONObject pushExtObject = new JSONObject();
+                pushExtObject.putOpt("type","call");
+
+                JSONObject customObject = new JSONObject();
+                customObject.putOpt("callId",EaseCallKit.getInstance().getCallID());
+                pushExtObject.putOpt("custom",customObject);
+
+                message.setAttribute("em_push_ext",pushExtObject);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
 
         final Conversation conversation = ChatClient.getInstance().chatManager().getConversation(username, Conversation.ConversationType.Chat, true);
         message.setMessageStatusCallback(new CallBack() {

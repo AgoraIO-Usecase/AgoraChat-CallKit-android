@@ -1149,10 +1149,23 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             }
             extObject.putOpt("isRtcCall", true);
             extObject.putOpt("callType", type.code);
+            extObject.putOpt("em_push_type", "voip");
         } catch (JSONException e) {
             e.printStackTrace();
         }
         message.setAttribute("em_apns_ext", extObject);
+        try {
+            JSONObject pushExtObject = new JSONObject();
+            pushExtObject.putOpt("type","call");
+
+            JSONObject customObject = new JSONObject();
+            customObject.putOpt("callId",EaseCallKit.getInstance().getCallID());
+            pushExtObject.putOpt("custom",customObject);
+
+            message.setAttribute("em_push_ext",pushExtObject);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         if (EaseCallKit.getInstance().getCallID() == null) {
             EaseCallKit.getInstance().setCallID(EaseCallKitUtils.getRandomString(10));

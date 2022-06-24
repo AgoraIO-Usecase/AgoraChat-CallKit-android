@@ -184,7 +184,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 }
             });
         }
-
         @Override
         public void onUserOffline(int uid, int reason) {
             runOnUiThread(new Runnable() {
@@ -229,6 +228,21 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     startCount();
                     if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VOICE_CALL) {
                         mBinding.llVoiceCallingControl.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onUserMuteVideo(int uid, boolean muted) {
+            super.onUserMuteVideo(uid, muted);
+            isRemoteVideoMuted = muted;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(EaseCallKit.getInstance().getCallType()==EaseCallType.SINGLE_VIDEO_CALL) {
+                        //加入时对方就可能已经关闭摄像头
+                        updateViewWithCameraStatus();
                     }
                 }
             });

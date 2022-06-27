@@ -10,8 +10,6 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VOICE
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_RELEASE_HANDLER;
 import static io.agora.rtc.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
 import static io.agora.rtc.Constants.CLIENT_ROLE_BROADCASTER;
-import static io.agora.rtc.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
-import static io.agora.rtc.Constants.REMOTE_VIDEO_STATE_STOPPED;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -184,7 +182,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 }
             });
         }
-
         @Override
         public void onUserOffline(int uid, int reason) {
             runOnUiThread(new Runnable() {
@@ -235,20 +232,23 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
 
         @Override
-        public void onRemoteVideoStateChanged(int uid, int state, int reason, int elapsed) {
+        public void onUserMuteVideo(int uid, boolean muted) {
+            super.onUserMuteVideo(uid, muted);
+            isRemoteVideoMuted = muted;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //remote stop video (对端停止视频)
-                    if (uid == remoteUId) {
-                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
-                            isRemoteVideoMuted = true;
+                    if(EaseCallKit.getInstance().getCallType()==EaseCallType.SINGLE_VIDEO_CALL) {
+                        //Stop the video remotely（对端停止视频在这里回调更新view）
+                        //Opens by onFirstRemoteVideoDecoded callback to update the view, avoid rebuild streaming video produced by the black screen time
+                        //(开启视频时由onFirstRemoteVideoDecoded回调更新view，避免重新建立视频流所产生的黑屏时间）
+                        //They'll probably have their cameras turned off by the time they join（加入时对方就可能已经关闭摄像头）
+                        if(muted) {
                             updateViewWithCameraStatus();
                         }
                     }
                 }
             });
-
         }
     };
 
@@ -857,15 +857,16 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         if (idInOppositeSurfaceLayout != uid) {
             idInOppositeSurfaceLayout = uid;
             SurfaceView localview = RtcEngine.CreateRendererView(getBaseContext());
-            mBinding.oppositeSurfaceLayout.removeAllViews();
-            mBinding.oppositeSurfaceLayout.addView(localview);
             VideoCanvas mLocalVideo = new VideoCanvas(localview, VideoCanvas.RENDER_MODE_HIDDEN, uid);
             if (uid == 0) {
                 mRtcEngine.setupLocalVideo(mLocalVideo);
             } else {
                 mRtcEngine.setupRemoteVideo(mLocalVideo);
             }
-
+            if(mBinding.oppositeSurfaceLayout.getChildCount()>=10) {
+                mBinding.oppositeSurfaceLayout.removeAllViews();
+            }
+            mBinding.oppositeSurfaceLayout.addView(localview);
         }
     }
 
@@ -875,14 +876,16 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             idInLocalSurfaceLayout = uid;
             TextureView remoteview = RtcEngine.CreateTextureView(getBaseContext());
             setBgRadius(remoteview, dp2px(EaseCallSingleBaseActivity.this, 12));
-            mBinding.localSurfaceLayout.removeAllViews();
-            mBinding.localSurfaceLayout.addView(remoteview);
             VideoCanvas mRemoteVideo = new VideoCanvas(remoteview, VideoCanvas.RENDER_MODE_HIDDEN, uid);
             if (uid == 0) {
                 mRtcEngine.setupLocalVideo(mRemoteVideo);
             } else {
                 mRtcEngine.setupRemoteVideo(mRemoteVideo);
             }
+            if(mBinding.localSurfaceLayout.getChildCount()>=10) {
+                mBinding.localSurfaceLayout.removeAllViews();
+            }
+            mBinding.localSurfaceLayout.addView(remoteview);
         }
     }
 

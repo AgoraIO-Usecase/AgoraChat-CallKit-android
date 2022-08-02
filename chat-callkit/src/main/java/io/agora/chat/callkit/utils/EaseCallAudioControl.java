@@ -98,7 +98,7 @@ public class EaseCallAudioControl {
     }
 
     /**
-     * 开启扬声器
+     * Turn on the speaker
      */
     public void openSpeakerOn() {
         try {
@@ -111,7 +111,7 @@ public class EaseCallAudioControl {
     }
 
     /**
-     * 关闭扬声器
+     * turn off the speakers
      */
     public void closeSpeakerOn() {
         try {

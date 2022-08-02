@@ -1,10 +1,10 @@
 package io.agora.chat.callkit.general;
 
 public enum EaseCallState {
-    CALL_IDLE(0), //初始状态
-    CALL_OUTGOING(1), //拨打电话状态
-    CALL_ALERTING(2),   //振铃状态
-    CALL_ANSWERED(3); //接通同话状态
+    CALL_IDLE(0), //initial state
+    CALL_OUTGOING(1), //Outgoing state
+    CALL_ALERTING(2), //Ringing state
+    CALL_ANSWERED(3); //Answered call state
 
     public int code;
 

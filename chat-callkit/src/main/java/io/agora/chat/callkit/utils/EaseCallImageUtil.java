@@ -74,16 +74,16 @@ public class EaseCallImageUtil {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setBgRadius(View view, int bgRadius) {
         if (Build.VERSION.SDK_INT >= 21) {
-            //设置圆角大小
+            //Set the rounded corner size
             view.setOutlineProvider(new ViewOutlineProvider() {
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), bgRadius);
                 }
             });
-            //设置阴影
+            //set shadow
             view.setElevation(10);
-            //设置圆角裁切
+            //set rounded corners Clip
             view.setClipToOutline(true);
         }
     }
@@ -99,7 +99,7 @@ public class EaseCallImageUtil {
                             @Override
                             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                                 Drawable current = resource.getCurrent();
-                                //设置背景图
+                                //set background image
                                 view.setBackground(current);
                             }
                         });
@@ -111,7 +111,7 @@ public class EaseCallImageUtil {
                             @Override
                             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                                 Drawable current = resource.getCurrent();
-                                //设置背景图
+                                //set background image
                                 view.setBackground(current);
                             }
                         });

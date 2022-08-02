@@ -1,9 +1,9 @@
 package io.agora.chat.callkit.bean;
 
 /**
- * 用户账号信息
- * uid      加入声网频道的uId
- * userName  uid对应的环信Id
+ * User account information
+ * uid      Join the uId of the AgoraRTC channel
+ * userName  agoraChat Id corresponding to uid
  */
 public class EaseUserAccount {
     private int uid;

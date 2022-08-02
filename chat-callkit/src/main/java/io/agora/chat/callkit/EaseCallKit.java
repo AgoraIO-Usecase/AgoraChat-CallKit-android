@@ -132,15 +132,8 @@ public class EaseCallKit {
     }
 
     /**
-     * \~chinese
-     * 初始化 EaseCallkit。
-     *
-     * @param context 上下文，不可为空。
-     * @param config  配置项，不可为空，见 {@link EaseCallKitConfig}。
-     *                <p>
-     *                \~english
-     *                Initializes the EaseCallkit.
-     *                Make sure to initialize the SDK in the main thread.
+     * Initializes the EaseCallkit.
+     * Make sure to initialize the SDK in the main thread.
      * @param context Make sure to set the param.
      * @param config  The configurations. Make sure to set the param, see {@link EaseCallKitConfig}.
      */
@@ -236,13 +229,7 @@ public class EaseCallKit {
     }
 
     /**
-     * \~chinese
-     * 注册用户进行单聊音视频通话的activity对应的Class，该Class对应的activity已经在用户应用层的AndroidManifest.xml文件中注册过
-     *
-     * @param videoCallClass 用户进行单聊音视频通话的activity对应的Class对象
-     *                       <p>
-     *                       \~english
-     *                       Register the activity which you want to display video call or audio call and you have registered in AndroidManifest.xml
+     * Register the activity which you want to display video call or audio call and you have registered in AndroidManifest.xml
      * @param videoCallClass the activity'class which you want to display video call or audio call
      */
     public void registerVideoCallClass(Class<? extends EaseCallSingleBaseActivity> videoCallClass) {
@@ -250,13 +237,7 @@ public class EaseCallKit {
     }
 
     /**
-     * \~chinese
-     * 注册用户进行多人音视频通话的activity对应的Class，该Class对应的activity实例已经在用户应用层的AndroidManifest.xml文件中注册过
-     *
-     * @param multipleVideoClass 用户进行多人音视频通话的activity对应的Class
-     *                           <p>
-     *                           \~english
-     *                           Register the activity which you want to display multiple video call or audio call and you have registered in AndroidManifest.xml
+     * Register the activity which you want to display multiple video call or audio call and you have registered in AndroidManifest.xml
      * @param multipleVideoClass the activity's class which you want to display multiple video call or audio call
      */
     public void registerMultipleVideoClass(Class<? extends EaseCallMultipleBaseActivity> multipleVideoClass) {
@@ -264,11 +245,6 @@ public class EaseCallKit {
     }
 
     /**
-     * \~chinese
-     * 获取当前callKit配置
-     *
-     * @return 当前callKit配置，参考{@link EaseCallKitConfig}
-     * \~english
      * Gets callkitconfig
      * @return the current callKit configuration, see {@link EaseCallKitConfig}
      */
@@ -283,13 +259,6 @@ public class EaseCallKit {
 
 
     /**
-     * \~chinese
-     * 加入1v1通话
-     * @param type 通话类型(只能为{@link EaseCallType#SINGLE_VOICE_CALL} 或者 {@link EaseCallType#SINGLE_VIDEO_CALL}类型）
-     * @param user 被叫用户ID(也就是AgoraChat userId)，不可为空
-     * @param ext  扩展字段(用户扩展字段), 如果用户不需要可以传入null
-     *             <p>
-     * \~english
      * Join in the 1V1 call
      * @param type call type (only {@link EaseCallType#SINGLE_VOICE_CALL } or {@link EaseCallType#SINGLE_VIDEO_CALL }）
      * @param user Called userId(AgoraChat userId)，not null or empty
@@ -301,14 +270,6 @@ public class EaseCallKit {
 
 
     /**
-     * \~chinese
-     * 加入1v1通话
-     * @param type 通话类型(只能为{@link EaseCallType#SINGLE_VOICE_CALL} 或者 {@link EaseCallType#SINGLE_VIDEO_CALL}类型）
-     * @param user 被叫用户ID(也就是AgoraChat userId),不可为空
-     * @param ext  扩展字段(用户扩展字段), 如果用户不需要可以传入null
-     * @param cls  继承自{@link EaseCallSingleBaseActivity}的activity对应的class
-     *             <p>
-     *\~english
      * Join in the 1V1 call
      * @param type call type (only {@link EaseCallType#SINGLE_VOICE_CALL } or {@link EaseCallType#SINGLE_VIDEO_CALL }）
      * @param user Called userId(AgoraChat userId)，not null or empty
@@ -357,13 +318,6 @@ public class EaseCallKit {
 
 
     /**
-     * \~chinese
-     * 邀请加入多人通话
-     * @param type 通话类型(只能为{@link EaseCallType#CONFERENCE_VIDEO_CALL} 或者 {@link EaseCallType#CONFERENCE_VOICE_CALL}类型）
-     * @param users 邀请的用户ID列表(AgoraChat userId)
-     * @param ext  扩展字段(用户扩展字段), 如果用户不需要可以传入null
-     *             <p>
-     * \~english
      * Invite to join a multi-party call
      * @param type call type (only {@link EaseCallType#CONFERENCE_VIDEO_CALL } or {@link EaseCallType#CONFERENCE_VOICE_CALL }）
      * @param users List of invited user ids (AgoraChat userId)
@@ -375,14 +329,6 @@ public class EaseCallKit {
 
 
     /**
-     * \~chinese
-     * 邀请加入多人通话
-     * @param type 通话类型(只能为{@link EaseCallType#CONFERENCE_VIDEO_CALL} 或者 {@link EaseCallType#CONFERENCE_VOICE_CALL}类型）
-     * @param users 邀请的用户ID列表(AgoraChat userId)
-     * @param ext  扩展字段(用户扩展字段), 如果用户不需要可以传入null
-     * @param cls   继承自{@link EaseCallMultipleBaseActivity}的activity
-     *             <p>
-     * \~english
      * Invite to join a multi-party call
      * @param type call type (only {@link EaseCallType#CONFERENCE_VIDEO_CALL } or {@link EaseCallType#CONFERENCE_VOICE_CALL }）
      * @param users List of invited user ids (AgoraChat userId)
@@ -479,7 +425,7 @@ public class EaseCallKit {
     }
 
     /**
-     * 增加消息监听
+     * Add MessageListener
      */
     private void addMessageListener() {
         this.messageListener = new MessageListener() {
@@ -672,7 +618,7 @@ public class EaseCallKit {
                                 event.callId = fromCallId;
                                 event.userId = fromUser;
 
-                                //is self (收到的仲裁为自己设备)
+                                //is self
                                 if (TextUtils.equals(calledDevId, EaseCallKit.deviceId)) {
                                     if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
                                         if (callListener != null) {
@@ -682,21 +628,21 @@ public class EaseCallKit {
                                 } else {
                                     hideCallingHeadDialog();
                                     resetState();
-                                    //handled in another device (提示已在其他设备处理)
+                                    //handled in another device
                                     EaseCallEndReason reason = null;
                                     if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                                        //agreed in another device (已经在其他设备接听)
+                                        //agreed in another device
                                         reason = EaseCallEndReasonHandleOnOtherDeviceAgreed;
                                     } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
-                                        //refused in another device(已经在其他设备拒绝)
+                                        //refused in another device
                                         reason = EaseCallEndReasonHandleOnOtherDeviceRefused;
                                     }
                                     if (callListener != null) {
-                                        //handled in another device(已经在其他设备处理)
+                                        //handled in another device
                                         callListener.onEndCallWithReason(callType, channelName, reason, 0);
                                     }
                                 }
-                                //publis the message
+                                //publish the message
                                 EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString()).postValue(event);
                                 break;
                             case CALL_ANSWER: // Received a reply message from the called party

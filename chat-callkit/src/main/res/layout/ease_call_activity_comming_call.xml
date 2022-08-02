@@ -46,7 +46,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/iv_avatar"
         tools:ignore="HardcodedText"
-        tools:text="张三" />
+        tools:text="apex" />
 
     <TextView
         android:id="@+id/tv_call_state"

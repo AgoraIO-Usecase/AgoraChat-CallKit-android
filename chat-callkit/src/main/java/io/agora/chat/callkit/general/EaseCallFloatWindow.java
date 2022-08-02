@@ -315,10 +315,10 @@ public class EaseCallFloatWindow {
         }
         memberView = view;
         uId = memberView.getUserId();
-        if (memberView.isShowVideo()) { // 视频未开启
+        if (memberView.isShowVideo()) {
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.VISIBLE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.GONE);
-        } else { // 视频已开启
+        } else {
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.GONE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.VISIBLE);
 
@@ -394,7 +394,7 @@ public class EaseCallFloatWindow {
     }
 
     /**
-     * 停止悬浮窗
+     * stop floating window
      */
     public void dismiss() {
         Log.i(TAG, "dismiss: ");
@@ -447,10 +447,10 @@ public class EaseCallFloatWindow {
         int targetX;
 
         if (left < splitLine) {
-            // 滑动到最左边
+            // swipe to the left
             targetX = 0;
         } else {
-            // 滑动到最右边
+            //swipe to the right
             targetX = screenWidth - floatViewWidth;
         }
 

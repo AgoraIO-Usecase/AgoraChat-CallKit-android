@@ -106,12 +106,12 @@ public class EaseCallCommingCallView extends FrameLayout {
             mInviterName.setText(groupId);
         }
         headUrl = EaseCallKitUtils.getUserHeadImage(username);
-        //加载头像图片
+        //Load avatar image
         loadHeadImage();
     }
 
     /**
-     * 加载用户配置头像
+     * Load user profile avatar
      *
      * @return
      */

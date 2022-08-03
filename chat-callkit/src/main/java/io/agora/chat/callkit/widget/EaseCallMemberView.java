@@ -136,7 +136,7 @@ public class EaseCallMemberView extends RelativeLayout {
     }
 
     /**
-     * 更新静音状态
+     * Update mute status
      */
     public void setAudioOff(boolean state) {
         if (!state) {
@@ -186,7 +186,7 @@ public class EaseCallMemberView extends RelativeLayout {
 
 
     /**
-     * 更新视频显示状态
+     * Update video display status
      */
     public void showVideo(boolean show) {
         isShowVideo = show;
@@ -222,7 +222,7 @@ public class EaseCallMemberView extends RelativeLayout {
 
 
     /**
-     * 设置当前 view 对应的 stream 的用户，主要用来语音通话时显示对方头像
+     * Set the user of the stream corresponding to the current view, mainly used to display the other party's avatar during a voice call
      */
     public void setUsername(String username) {
         headUrl = EaseCallKitUtils.getUserHeadImage(username);
@@ -235,7 +235,7 @@ public class EaseCallMemberView extends RelativeLayout {
     }
 
     /**
-     * 设置当前控件显示的 Stream Id
+     * Set the Stream Id displayed by the current control
      */
     public void setStreamId(String streamId) {
         this.streamId = streamId;
@@ -266,9 +266,7 @@ public class EaseCallMemberView extends RelativeLayout {
 
 
     /**
-     * 加载用户配置头像
-     *
-     * @return
+     * Load user profile avatar
      */
     private void loadHeadImage() {
         setImage(getContext(), avatarView, headUrl);

@@ -39,9 +39,9 @@ public class EaseCallKitUtils {
     public final static String UPDATE_CALLINFO = "updateCallInfo";
 
     /**
-     * length用户要求产生字符串的长度，随机生成会议密码
+     * Randomly generate meeting password
      *
-     * @param length
+     * @param length represents the length of the generated password string
      * @return
      */
     static public String getRandomString(int length) {
@@ -57,16 +57,14 @@ public class EaseCallKitUtils {
 
 
     /**
-     * 获取手机唯一标识符
+     * Get mobile phone unique identifier
      *
      * @return
      */
     public static String getPhoneSign() {
         StringBuilder deviceId = new StringBuilder();
-        // 渠道标志
         deviceId.append("a");
         try {
-            // 则生成一个id：随机码
             String uuid = getUUID();
             if (!TextUtils.isEmpty(uuid)) {
                 deviceId.append("id");
@@ -95,17 +93,17 @@ public class EaseCallKitUtils {
     }
 
     /**
-     * 获取用户头像
+     * Get user avatar
      *
-     * @param uersId
+     * @param userId
      * @return
      */
-    public static String getUserHeadImage(String uersId) {
+    public static String getUserHeadImage(String userId) {
         EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
         if (callKitConfig != null) {
             Map<String, EaseCallUserInfo> userInfoMap = callKitConfig.getUserInfoMap();
             if (userInfoMap != null) {
-                EaseCallUserInfo userInfo = userInfoMap.get(uersId);
+                EaseCallUserInfo userInfo = userInfoMap.get(userId);
                 if (userInfo != null) {
                     if (userInfo.getHeadImage() != null && userInfo.getHeadImage().length() > 0) {
                         return userInfo.getHeadImage();
@@ -118,31 +116,31 @@ public class EaseCallKitUtils {
     }
 
     /**
-     * 获取用户昵称
+     * Get user nickname
      *
-     * @param uersId
+     * @param userId
      * @return
      */
-    public static String getUserNickName(String uersId) {
+    public static String getUserNickName(String userId) {
         EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
         if (callKitConfig != null) {
             Map<String, EaseCallUserInfo> userInfoMap = callKitConfig.getUserInfoMap();
             if (userInfoMap != null) {
-                EaseCallUserInfo userInfo = userInfoMap.get(uersId);
+                EaseCallUserInfo userInfo = userInfoMap.get(userId);
                 if (userInfo != null) {
                     if (userInfo.getNickName() != null && userInfo.getNickName().length() > 0) {
                         return userInfo.getNickName();
                     }
                 }
             }
-            return uersId;
+            return userId;
         }
-        return uersId;
+        return userId;
     }
 
 
     /**
-     * 获取用户振铃文件
+     * Get user ringer file
      *
      * @return
      */
@@ -188,13 +186,12 @@ public class EaseCallKitUtils {
     }
 
     /**
-     * 将本应用置顶到最前端
-     * 当本应用位于后台时，则将它切换到最前端
+     * When the app is in the background, switch it to the foreground
      *
      * @param context
      */
     public static void bring2Front(Context context) {
-        /**获取ActivityManager*/
+        /** Get ActivityManager*/
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -204,10 +201,10 @@ public class EaseCallKitUtils {
                 break;
             }
         } else {
-            /**获得当前运行的task(任务)*/
+            /** Get the currently running task*/
             List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
             for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-                /**找到本应用的 task，并将它切换到前台*/
+                /**Find the task of this application and switch it to the foreground*/
                 if (taskInfo.topActivity.getPackageName().equals(context.getPackageName())) {
                     activityManager.moveTaskToFront(taskInfo.id, 0);
                     break;
@@ -257,7 +254,8 @@ public class EaseCallKitUtils {
 
 
     /**
-     * 判断用户是否重写EaseCallKitListener中的onGenerateToken方法
+     *
+     * Determine whether the user has rewritten EaseCallKitListener中的onGenerateToken
      *
      * @param listener
      * @return

@@ -127,10 +127,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     private String agoraAppId = null;
     // Camera direction: front or back
     private boolean isCameraFront;
-    // To prevent opening the request hover page multiple times(用于防止多次打开请求悬浮框页面)
+    // To prevent opening the request hover page multiple times
     private boolean requestOverlayPermission;
     private boolean isAgreedInHeadDialog;
-    //in channel EaseUserAccounts(加入频道的EaseUserAccounts)
+    //in channel EaseUserAccounts
     private Map<Integer, EaseUserAccount> inChannelAccounts = new HashMap<>();
     EaseCallKitListener listener = EaseCallKit.getInstance().getCallListener();
     private final IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() {
@@ -156,13 +156,13 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         setSpeakerMode(true);
                     }
                     if (!isInComingCall) {
-                        //send invite message (发送邀请信息)
+                        //send invite message
                         if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VIDEO_CALL) {
                             handler.sendEmptyMessage(MSG_MAKE_SIGNAL_VIDEO);
                         } else {
                             handler.sendEmptyMessage(MSG_MAKE_SIGNAL_VOICE);
                         }
-                        //start invite time record (开始定时器)
+                        //start invite time record
                         timehandler.startTime();
                     }
                 }
@@ -176,7 +176,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 @Override
                 public void run() {
                     EaseCallAudioControl.getInstance().stopPlayRing();
-                    // the remote come in (检测到对方进来)
+                    // the remote come in
                     makeOngoingStatus();
                     setUserJoinChannelInfo(null, uid);
                 }
@@ -187,13 +187,13 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //the remote exit ,the exit self too (检测到对方退出 自己退出)
+                    //the remote exit ,the exit self too
                     exitChannel();
                     if (inChannelAccounts != null) {
                         inChannelAccounts.remove(uid);
                     }
                     if (listener != null) {
-                        //remote hangup (对方挂断)
+                        //remote hangup
                         long time = getChronometerSeconds(mBinding.chronometer);
                         listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, time * 1000);
                     }
@@ -239,10 +239,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 @Override
                 public void run() {
                     if(EaseCallKit.getInstance().getCallType()==EaseCallType.SINGLE_VIDEO_CALL) {
-                        //Stop the video remotely（对端停止视频在这里回调更新view）
+                        //Stop the video remotely
                         //Opens by onFirstRemoteVideoDecoded callback to update the view, avoid rebuild streaming video produced by the black screen time
-                        //(开启视频时由onFirstRemoteVideoDecoded回调更新view，避免重新建立视频流所产生的黑屏时间）
-                        //They'll probably have their cameras turned off by the time they join（加入时对方就可能已经关闭摄像头）
+                        //They'll probably have their cameras turned off by the time they join
                         if(muted) {
                             updateViewWithCameraStatus();
                         }
@@ -365,10 +364,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             //Set gaussian blur background
             String userHeadImage = EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser());
             setViewGaussianBlur(mBinding.rootLayout, userHeadImage);
-            //sufaceview gone
+            //surfaceView gone
             mBinding.localSurfaceLayout.setVisibility(View.GONE);
             mBinding.oppositeSurfaceLayout.setVisibility(View.GONE);
-            //voice ui visiable (语音通话UI可见)
+            //voice ui visitable
             mBinding.ivAvatar.setVisibility(View.VISIBLE);
         }
         mBinding.llVideoCalled.setVisibility(View.GONE);
@@ -432,7 +431,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
     /**
-     * incoming ui status (来电话的状态)
+     * incoming ui status
      */
     private void makeComingStatus() {
         mBinding.groupUseInfo.setVisibility(View.VISIBLE);
@@ -453,7 +452,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
 
     /**
-     * on going ui state (通话中的状态)
+     * on going ui state
      */
     private void makeOngoingStatus() {
         isOngoingCall = true;
@@ -493,7 +492,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
     /**
-     * calling ui state (拨打电话的状态)
+     * calling ui state
      */
     public void makeCallStatus() {
         if (!isInComingCall && callType == EaseCallType.SINGLE_VOICE_CALL) {
@@ -525,7 +524,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 agoraAppId = config.getAgoraAppId();
             }
             mRtcEngine = RtcEngine.create(getBaseContext(), agoraAppId, mRtcEventHandler);
-            //// Because there is a applet set to live mode, the role is set to master(因为有小程序 设置为直播模式 角色设置为主播)
+            //// Because there is a applet set to live mode, the role is set to master
             mRtcEngine.setChannelProfile(CHANNEL_PROFILE_LIVE_BROADCASTING);
             mRtcEngine.setClientRole(CLIENT_ROLE_BROADCASTER);
             EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
@@ -582,7 +581,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 }
             });
         } else {
-            //Don't checkout token(不校验token)
+            //Don't checkout token
             mRtcEngine.joinChannel(null, channelName, null, 0);
             //add uid to inChannelAccounts
             inChannelAccounts.put(0, new EaseUserAccount(0, ChatClient.getInstance().getCurrentUser()));
@@ -619,7 +618,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 sendCmdMsg(cancelEvent, username);
             } else {
                 if (listener != null) {
-                    //normal hangup 通话结束原因挂断
+                    //normal hangup
                     long time = getChronometerSeconds(mBinding.chronometer);
                     listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, time * 1000);
                 }
@@ -643,7 +642,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 mRtcEngine.muteLocalAudioStream(true);
                 isMuteVoice = true;
             }
-        } else if (id == R.id.iv_speaker) { // handsfree
+        } else if (id == R.id.iv_speaker) {
             setSpeakerMode(!isSpeakerOn);
         } else if (id == R.id.btn_switch_camera) {
             changeCameraDirection(!isCameraFront);
@@ -668,7 +667,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 }
             }
         } else if (id == R.id.btn_video_transe_comming || id == R.id.btn_video_transe) {
-            //Switch to audio before entering a call(进入通话之前转音频)
+            //Switch to audio before entering a call
             callType = EaseCallType.SINGLE_VOICE_CALL;
             EaseCallKit.getInstance().setCallType(EaseCallType.SINGLE_VOICE_CALL);
             EaseCallFloatWindow.getInstance(getApplicationContext()).setCallType(callType);
@@ -678,7 +677,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             }
             mBinding.localSurfaceLayout.setVisibility(View.GONE);
             mBinding.oppositeSurfaceLayout.setVisibility(View.GONE);
-            //Set gaussian blur background(设置高斯模糊背景)
+            //Set gaussian blur background
             setViewGaussianBlur(rootView, EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser()));
 
             loadHeadImage();
@@ -693,7 +692,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 //            }
             if (isInComingCall) {
                 EaseCallAudioControl.getInstance().stopPlayRing();
-                //send answer message (发送接听消息)
+                //send answer message
                 EaseCallAnswerEvent event = new EaseCallAnswerEvent();
                 event.result = EaseCallMsgUtils.CALL_ANSWER_ACCEPT;
                 event.callId = EaseCallKit.getInstance().getCallID();
@@ -702,12 +701,12 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 event.transVoice = true;
                 sendCmdMsg(event, username);
             } else {
-                //send voice to voice event (发送转音频信息)
+                //send voice to voice event
                 EaseCallVideoToVoiceeEvent event = new EaseCallVideoToVoiceeEvent();
                 sendCmdMsg(event, username);
             }
         } else if (id == R.id.iv_vidicon_video_called || id == R.id.iv_vidicon_video_calling) {
-            //close camera(关闭摄像头)
+            //close camera
             if (!isLocalVideoMuted) {
                 mRtcEngine.muteLocalVideoStream(true);
                 isLocalVideoMuted = true;
@@ -769,7 +768,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     private void updateViewWithCameraStatus() {
         if (isLocalVideoMuted && isRemoteVideoMuted) {
-            //Turn off the cameras on both sides (双方都关闭摄像头)
+            //Turn off the cameras on both sides
             mBinding.btnSwitchCamera.setVisibility(View.GONE);
             mBinding.cslMuteSmallview.setVisibility(View.GONE);
             mBinding.localSurfaceLayout.setVisibility(View.GONE);
@@ -781,7 +780,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             mBinding.tvCallStateVoice.setText("");
             setImage(this, mBinding.ivAvatarVoice, headUrl);
         } else if (isLocalVideoMuted && !isRemoteVideoMuted) {
-            //Local disabled The remote camera is not disabled(本地关闭远端没有关闭摄像头)
+            //Local disabled The remote camera is not disabled
             mBinding.btnSwitchCamera.setVisibility(View.GONE);
             mBinding.rootLayout.setBackground(null);
             mBinding.cslMuteSmallview.setVisibility(View.VISIBLE);
@@ -790,7 +789,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             updateOppositeSurfaceLayoutUid(remoteUId);
             setImage(this, mBinding.ivMuteSmall, EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser()));
         } else if (!isLocalVideoMuted && isRemoteVideoMuted) {
-            //The local camera is disabled, and the remote camera is disabled(本地没有关闭、远端关闭摄像头)
+            //The local camera is disabled, and the remote camera is disabled
             mBinding.btnSwitchCamera.setVisibility(View.VISIBLE);
             mBinding.rootLayout.setBackground(null);
             mBinding.llVoiceCallingHead.setVisibility(View.GONE);
@@ -800,7 +799,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             idInLocalSurfaceLayout = -1;
             setImage(this, mBinding.ivMuteSmall, headUrl);
         } else {
-            //Neither side turned off their cameras(双方都没有关闭摄像头)
+            //Neither side turned off their cameras
             mBinding.btnSwitchCamera.setVisibility(View.VISIBLE);
             mBinding.rootLayout.setBackground(null);
             mBinding.llVoiceCallingHead.setVisibility(View.GONE);
@@ -831,7 +830,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     private void sendRefuseMessage() {
         stopCount();
-        //send refused message (发送拒绝消息)
+        //send refused message
         EaseCallAnswerEvent event = new EaseCallAnswerEvent();
         event.result = EaseCallMsgUtils.CALL_ANSWER_REFUSE;
         event.callId = EaseCallKit.getInstance().getCallID();
@@ -898,30 +897,30 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     void changeVideoVoiceState() {
         if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
-            // change to voice  ui (切换到音频通话UI)
+            // change to voice  ui
             mBinding.ivAvatar.setVisibility(View.GONE);
 
-            //sufaceview gone
+            //surfaceView gone
             mBinding.localSurfaceLayout.setVisibility(View.VISIBLE);
             mBinding.oppositeSurfaceLayout.setVisibility(View.VISIBLE);
 
             makeOngoingStatus();
-        } else { // change to voice  ui (切换到视频通话UI )
+        } else { // change to voice  ui
             mBinding.localSurfaceLayout.setVisibility(View.GONE);
             mBinding.oppositeSurfaceLayout.setVisibility(View.GONE);
-            //Set gaussian blur background(设置高斯模糊背景)
+            //Set gaussian blur background
             setViewGaussianBlur(rootView, EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser()));
 
-            //in calling (已经在通话中)
+            //in calling
             if (EaseCallKit.getInstance().getCallState() == EaseCallState.CALL_ANSWERED) {
-                //voice ui visiable (语音通话UI可见)
+                //voice ui visitable
                 mBinding.ivAvatar.setVisibility(View.VISIBLE);
                 makeOngoingStatus();
             } else {
                 mBinding.localSurfaceLayout.setVisibility(View.GONE);
                 mBinding.oppositeSurfaceLayout.setVisibility(View.GONE);
                 mBinding.tvCallStateVoice.setVisibility(View.VISIBLE);
-                //Set gaussian blur background(设置高斯模糊背景)
+                //Set gaussian blur background
                 setViewGaussianBlur(rootView, EaseCallKitUtils.getUserHeadImage(ChatClient.getInstance().getCurrentUser()));
 
                 if (isInComingCall) {
@@ -946,39 +945,39 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 switch (event.callAction) {
                     case CALL_ALERT:
                         EaseCallAlertEvent alertEvent = (EaseCallAlertEvent) event;
-                        //Determine whether the session is valid(判断会话是否有效)
+                        //Determine whether the session is valid
                         EaseCallConfirmRingEvent ringEvent = new EaseCallConfirmRingEvent();
                         if (TextUtils.equals(alertEvent.callId, EaseCallKit.getInstance().getCallID())
                                 && EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_ANSWERED) {
-                            //Send a valid session message(发送会话有效消息)
+                            //Send a valid session message
                             ringEvent.calleeDevId = alertEvent.calleeDevId;
                             ringEvent.callId = alertEvent.callId;
                             ringEvent.valid = true;
                             sendCmdMsg(ringEvent, username);
                         } else {
-                            //Send a invalid session message(发送会话无效消息)
+                            //Send a invalid session message
                             ringEvent.calleeDevId = alertEvent.calleeDevId;
                             ringEvent.callId = alertEvent.callId;
                             ringEvent.valid = false;
                             sendCmdMsg(ringEvent, username);
                         }
-                        //A session confirmation message has been sent. Procedure(已经发送过会话确认消息)
+                        //A session confirmation message has been sent. Procedure
                         mConfirmRing = true;
                         break;
                     case CALL_CANCEL:
 
                         if (!TextUtils.equals(event.userId, username) && !TextUtils.equals(event.userId, ChatClient.getInstance().getCurrentUser())) {
-                            //An event sent by a strange third party(陌生的第三者发的event)
+                            //An event sent by a strange third party
                             break;
                         }
                         if (!isInComingCall) {
-                            //Stop quorum timer(停止仲裁定时器)
+                            //Stop quorum timer
                             timehandler.stopTime();
                         }
-                        //cancel call (取消通话)
+                        //cancel call
                         exitChannel();
                         if (listener != null) {
-                            //对方取消
+                            //the other party cancels
                             listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRemoteCancel, 0);
                         }
                         break;
@@ -999,7 +998,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                                         exitChannel();
 
                                         if (listener != null) {
-                                            //The other party is busy(对方正在忙碌中)
+                                            //The other party is busy
                                             listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, 0);
                                         }
 
@@ -1010,7 +1009,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                                 sendCmdMsg(callEvent, username);
                             }
                         } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                            //Set to answer(设置为接听)
+                            //Set to answer
                             EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
                             timehandler.stopTime();
                             sendCmdMsg(callEvent, username);
@@ -1032,7 +1031,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         }
                         break;
                     case CALL_INVITE:
-                        //An audio transfer event was received. (收到转音频事件)
+                        //An audio transfer event was received.
                         EaseCallInviteEventEase inviteEvent = (EaseCallInviteEventEase) event;
                         if (inviteEvent.type == EaseCallType.SINGLE_VOICE_CALL) {
                             callType = EaseCallType.SINGLE_VOICE_CALL;
@@ -1051,9 +1050,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         String deviceId = confirmEvent.calleeDevId;
                         String result = confirmEvent.result;
                         timehandler.stopTime();
-                        //is self device (收到的仲裁为自己设备)
+                        //is self device
                         if (TextUtils.equals(deviceId, EaseCallKit.deviceId)) {
-                            //The received arbitration is an answer(收到的仲裁为接听)
+                            //The received arbitration is an answer
                             if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
                                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
                                 joinChannel();
@@ -1072,7 +1071,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         EaseCallLiveDataBus.get().with(EaseCallKitUtils.UPDATE_USERINFO, EaseCallUserInfo.class).observe(this, userInfo -> {
             if (userInfo != null) {
                 if (TextUtils.equals(userInfo.getUserId(), username)) {
-                    //Update local avatar nicknames(更新本地头像昵称)
+                    //Update local avatar nicknames
                     EaseCallKit.getInstance().getCallKitConfig().setUserInfo(username, userInfo);
                     updateUserInfo();
                 }
@@ -1085,10 +1084,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_MAKE_SIGNAL_VOICE: // 1V1 voice call (语音通话)
+                case MSG_MAKE_SIGNAL_VOICE: // 1V1 voice call
                     sendInviteeMsg(username, EaseCallType.SINGLE_VOICE_CALL);
                     break;
-                case MSG_MAKE_SIGNAL_VIDEO: // 1V1 video call (视频通话)
+                case MSG_MAKE_SIGNAL_VIDEO: // 1V1 video call
                     sendInviteeMsg(username, EaseCallType.SINGLE_VIDEO_CALL);
                     break;
                 case MSG_RELEASE_HANDLER:
@@ -1105,7 +1104,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
 
     private void sendInviteeMsg(String username, EaseCallType callType) {
-        //update nickname image (更新昵称 头像)
+        //update nickname image
         notifyUserToUpdateUserInfo(username);
 
         mConfirmRing = false;
@@ -1137,7 +1136,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             }
         }
 
-        //add push attr (增加推送字段)
+        //add push attr
         JSONObject extObject = new JSONObject();
         try {
             EaseCallType type = EaseCallKit.getInstance().getCallType();
@@ -1217,14 +1216,14 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                             if (cancel) {
                                 resetState();
                                 if (listener != null) {
-                                    // cancel call (取消通话)
+                                    // cancel call
                                     listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonCancel, 0);
                                 }
                             } else {
-                                //show redial view (显示recall页面)
+                                //show redial view
                                 showRedialView();
                                 if (listener != null) {
-                                    // remote no reponse (对方无响应)
+                                    // remote no response
                                     listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRemoteNoResponse, 0);
                                 }
 
@@ -1232,10 +1231,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         }
                     });
                 } else if (event.callAction == EaseCallAction.CALL_CONFIRM_CALLEE) {
-                    //Exit channel without on state(不为接通状态 退出频道)
+                    //Exit channel without on state
                     if (!TextUtils.equals(((EaseCallConfirmCallEvent) event).result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
                         String result = ((EaseCallConfirmCallEvent) event).result;
-                        //remote refused call (对方拒绝通话)
+                        //remote refused call
                         if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -1245,14 +1244,14 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                                     }
                                 }
                             });
-                            //show recall view (显示recall页面)
+                            //show recall view
                             showRedialView();
                         } else {
                             resetState();
                         }
                     }
                 } else if (event.callAction == EaseCallAction.CALL_ANSWER) {
-                    //After the reply, start the timer and wait for the arbitration timeout(回复以后启动定时器，等待仲裁超时)
+                    //After the reply, start the timer and wait for the arbitration timeout
                     timehandler.startTime();
                 }
             }
@@ -1266,7 +1265,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 if (event.callAction == EaseCallAction.CALL_CANCEL) {
                     resetState();
                 } else if (event.callAction == EaseCallAction.CALL_CONFIRM_CALLEE) {
-                    //Exit channel without on state(不为接通状态 退出频道)
+                    //Exit channel without on state
                     if (!TextUtils.equals(((EaseCallConfirmCallEvent) event).result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
                         resetState();
                     }
@@ -1280,7 +1279,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         });
     }
 
-    //recall view (重拨页面)
+    //recall view
     private void showRedialView() {
         runOnUiThread(new Runnable() {
             @Override
@@ -1307,7 +1306,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     EaseCallFloatWindow.getInstance(getApplicationContext()).dismiss();
                 }
                 insertCancelMessageToLocal();
-                //reset state 重置状态
+                //reset state
                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
                 EaseCallKit.getInstance().setCallID(null);
             }
@@ -1351,13 +1350,13 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     intervalTime = EaseCallMsgUtils.CALL_INVITE_INTERVAL;
                 }
                 if (timePassed * 1000 == intervalTime) {
-                    //invite call time out (呼叫超时 )
+                    //invite call time out
                     timehandler.stopTime();
                     if (isInComingCall) {
                         //The called party waiting for the arbitration message timed out(被叫等待仲裁消息超时)
                         showRedialView();
                         if (listener != null) {
-                            //remote no response (对方接通超时)
+                            //remote no response
                             listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRemoteNoResponse, 0);
                         }
                     } else {
@@ -1366,7 +1365,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         cancelEvent.remoteTimeout = true;
                         cancelEvent.callId = EaseCallKit.getInstance().getCallID();
 
-                        //The sender fails to connect due to timeout（对方超时未接通,发送取消）
+                        //The sender fails to connect due to timeout
                         sendCmdMsg(cancelEvent, username);
                     }
                 }
@@ -1436,7 +1435,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
     private void updateUserInfo() {
-        //update local user nickname and image 更新本地头像昵称
+        //update local user nickname and image
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1455,8 +1454,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 EaseCallAudioControl.getInstance().stopPlayRing();
                 isOngoingCall = false;
 
-                //Note that it cannot be placed directly in the life cycle function, so as to avoid the impact of the previous instance's delayed release on this instance （注意不能直接放在生命周期函数里，避免上个实例延迟释放对本实例产生影响）
-                //reset state 重置状态
+                //Note that it cannot be placed directly in the life cycle function, so as to avoid the impact of the previous instance's delayed release on this instance
+                //reset state
                 releaseHandler();
                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
                 EaseCallKit.getInstance().setCallID(null);
@@ -1506,7 +1505,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
     private void checkFloatIntent(Intent intent) {
-        //Prevent the activity from being started in the background to the foreground, causing the Window to still exist( 防止activity在后台被start至前台导致window还存在)
+        //Prevent the activity from being started in the background to the foreground, causing the Window to still exist
         if (isFloatWindowShowing()) {
             EaseCallFloatWindow.SingleCallInfo callInfo = EaseCallFloatWindow.getInstance().getSingleCallInfo();
             if (callInfo != null) {
@@ -1538,7 +1537,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
     /**
-     * do show float window (显示悬浮窗)
+     * do show float window
      */
     @Override
     public void doShowFloatWindow() {
@@ -1587,7 +1586,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     }
 
     /**
-     * stop event loop (停止事件循环)
+     * stop event loop
      */
     protected void releaseHandler() {
         if(handler!=null) {
@@ -1625,7 +1624,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
 
     /**
-     * Whether to exit the call prompt box(是否退出当前通话提示框)
+     * Whether to exit the call prompt box
      */
     public void exitChannelDisplay() {
         AlertDialog.Builder builder = new AlertDialog.Builder(EaseCallSingleBaseActivity.this);
@@ -1653,7 +1652,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 } else {
                     exitChannel();
                     if (listener != null) {
-                        //通话结束原因挂断
+                        //The reason for the end of the call is to hang up
                         long time = getChronometerSeconds(mBinding.chronometer);
                         listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, time * 1000);
                     }

@@ -1,10 +1,10 @@
 package io.agora.chat.callkit.general;
 
 public enum EaseCallType {
-    SINGLE_VOICE_CALL(0), //1v1语音通话
-    SINGLE_VIDEO_CALL(1), //1v1视频通话
-    CONFERENCE_VIDEO_CALL(2),   //多人视频
-    CONFERENCE_VOICE_CALL(3);//多人音频
+    SINGLE_VOICE_CALL(0), //1v1 voice call
+    SINGLE_VIDEO_CALL(1), //1v1 video call
+    CONFERENCE_VIDEO_CALL(2),//multiplayer video
+    CONFERENCE_VOICE_CALL(3);//multiplayer voice
 
     public int code;
 

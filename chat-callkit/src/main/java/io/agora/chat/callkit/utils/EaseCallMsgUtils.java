@@ -33,6 +33,6 @@ public class EaseCallMsgUtils {
     final public static int CALL_TIMER_TIMEOUT = 0;
     final public static int CALL_TIMER_CALL_TIME = 1;
 
-    final public static long CALL_INVITE_INTERVAL = 30 * 1000;  //主叫超时时间
-    final public static int CALL_INVITED_INTERVAL = 5 * 1000; //被叫超时时间
+    final public static long CALL_INVITE_INTERVAL = 30 * 1000;
+    final public static int CALL_INVITED_INTERVAL = 5 * 1000;
 }

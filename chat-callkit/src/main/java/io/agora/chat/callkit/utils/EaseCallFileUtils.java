@@ -16,13 +16,13 @@ public class EaseCallFileUtils {
     }
 
     /**
-     * 拷贝asset下的文件到context.getFilesDir()目录下
+     * Copy the files under the asset to the context.getFilesDir() directory
      */
     private static void copyFileIfNeed(Context context, String modelName) {
         InputStream is = null;
         OutputStream os = null;
         try {
-            // 默认存储在data/data/<application name>/file目录下
+            //By default stored in data/data/<application name>/file
             File modelFile = new File(context.getFilesDir(), modelName);
             is = context.getAssets().open(modelName);
             if (modelFile.length() == is.available()) {

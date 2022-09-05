@@ -1,7 +1,5 @@
 package io.agora.chat.callkit.ui;
 
-import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceAgreed;
-import static io.agora.chat.callkit.general.EaseCallEndReason.EaseCallEndReasonHandleOnOtherDeviceRefused;
 import static io.agora.chat.callkit.general.EaseCallError.PROCESS_ERROR;
 import static io.agora.chat.callkit.general.EaseCallProcessError.CALL_PARAM_ERROR;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.CALL_INVITE_EXT;
@@ -132,17 +130,17 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     private String groupId;
     private boolean isPreview;
     private Bundle savedInstanceState;
-    // Record The users invited time（用户定时map存储,记录超时）
+    // Record The users invited time
     private Map<String, Long> invitedUsersTime = new HashMap<>();
-    //Record views stored in surfaceViewGroup（记录surfaceViewGroup中存放的views）
+    //Record views stored in surfaceViewGroup
     private final Map<Integer, EaseCallMemberView> inChannelViews = new HashMap<>();
-    //in channel EaseUserAccounts(加入频道的EaseUserAccounts)
+    //in channel EaseUserAccounts
     private Map<Integer, EaseUserAccount> inChannelAccounts = new HashMap<>();
-    //Record the corresponding AgoraChat userId and agora uid, which is used when users update local information(记录对应AgoraChat userId和声网uid,用户更新本地信息时用)
+    //Record the corresponding AgoraChat userId and agora uid, which is used when users update local information
     private final Map<String, Integer> userIdAndUidMap = new HashMap<>();
-    //Record placeholder views(记录占位views)
+    //Record placeholder views
     private final Map<String, EaseCallMemberView> placeholders = new HashMap<>();
-    //Record agora uids without speaking(记录没有说话的声网uids)
+    //Record agora uids without speaking
     private List<Integer> uidsNotSpeak = new ArrayList<>();
     //Invitation + has entered
     private Set<String> effectiveUsers = new HashSet<>();
@@ -210,7 +208,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     if (!userIdAndUidMap.containsValue(uid)) {
                         userIdAndUidMap.put(userInfo.userAccount, uid);
                     }
-                    //Delete placeholders (删除占位符)
+                    //Delete placeholders
                     EaseCallMemberView placeView = placeholders.remove(userInfo.userAccount);
                     if (placeView != null) {
                         mBinding.surfaceViewGroup.removeView(placeView);
@@ -261,13 +259,13 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         userIdAndUidMap.remove(account.getUserName());
                     }
 
-                    int uid = 0;
-                    if (inChannelViews.size() > 0) { // If there are other members in the room, the first member is displayed（如果会议中有其他成员,则显示第一个成员）
+                    int tempUid = 0;
+                    if (inChannelViews.size() > 0) { // If there are other members in the room, the first member is displayed
                         Set<Integer> uidSet = inChannelViews.keySet();
                         for (int id : uidSet) {
-                            uid = id;
+                            tempUid = id;
                         }
-                        updateFloatWindow(inChannelViews.get(uid));
+                        updateFloatWindow(inChannelViews.get(tempUid));
                     }
 
                     if (inChannelAccounts != null) {
@@ -294,7 +292,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                             }
                         }
                         if (memberView != null) {
-                            //Delete placeholders (删除占位符)
+                            //Delete placeholders
                             EaseCallMemberView placeView = placeholders.remove(memberView.getUserAccount());
                             if (placeView != null) {
                                 mBinding.surfaceViewGroup.removeView(placeView);
@@ -318,7 +316,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                             memberView.setUserInfo(inChannelAccounts.get(uid));
                         }
 
-                        //Delete placeholders (删除占位符)
+                        //Delete placeholders
                         EaseCallMemberView placeView = placeholders.remove(memberView.getUserAccount());
                         if (placeView != null) {
                             mBinding.surfaceViewGroup.removeView(placeView);
@@ -355,7 +353,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         }
 
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
-                            // Determine the video is the current hover window update hover window（判断视频是当前悬浮窗 更新悬浮窗）
+                            // Determine the video is the current hover window update hover window
                             EaseCallMemberView floatView = EaseCallFloatWindow.getInstance().getCallMemberView();
                             if (floatView != null && floatView.getUserId() == uid) {
                                 updateFloatWindow(inChannelViews.get(uid));
@@ -396,7 +394,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                 memberView.setUserInfo(inChannelAccounts.get(uid));
                             }
 
-                            //Delete placeholders (删除占位符)
+                            //Delete placeholders
                             EaseCallMemberView placeView = placeholders.remove(memberView.getUserAccount());
                             if (placeView != null) {
                                 mBinding.surfaceViewGroup.removeView(placeView);
@@ -406,7 +404,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                             mBinding.surfaceViewGroup.addView(memberView);
                             inChannelViews.put(uid, memberView);
 
-                            //notify user to update userinfo (通知更新)
+                            //notify user to update userinfo
                             if(inChannelAccounts.containsKey(uid)) {
                                 EaseUserAccount account = inChannelAccounts.get(uid);
                                 if (account != null) {
@@ -509,7 +507,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        boolean hasPermissionDismiss = false;// Permission failed(有权限没有通过)
+        boolean hasPermissionDismiss = false;// Permission failed
         if (PERMISSION_REQ_ID == requestCode) {
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] == -1) {
@@ -547,14 +545,14 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         EaseCallAudioControl.getInstance().openSpeakerOn();
         mBinding.surfaceViewGroup.setCallType(callType);
 
-        //If you are invited, an invitation window is displayed(被邀请的话弹出邀请界面)
+        //If you are invited, an invitation window is displayed
         if (isInComingCall) {
-            //Click the agree button in the box outside to enter(点击外面弹框中的同意按钮进来的)
+            //Click the agree button in the box outside to enter
             if (isAgreedInHeadDialog) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        //Agree to answer directly, because click on the outside agree(直接同意接听，因为在外边点击同意了)
+                        //Agree to answer directly, because click on the outside agree
                         addLocalViewToConferenceViewsGroup();
                         sendAgreeMessage();
                     }
@@ -563,7 +561,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 EaseCallAudioControl.getInstance().playRing();
                 mBinding.incomingCallView.setInviteInfo(username, groupId, callType);
                 mBinding.incomingCallView.setVisibility(View.VISIBLE);
-                // Update the nickname avatar(更新昵称头像)
+                // Update the nickname avatar
                 notifyUserToUpdateUserInfo(ChatClient.getInstance().getCurrentUser(),0);
             }
         } else {
@@ -572,7 +570,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             if (inviteeUsers != null && inviteeUsers.size() > 0) {
                 EaseCallAudioControl.getInstance().playRing();
             }
-            //Calling party joins channel(主叫加入频道)
+            //Calling party joins channel
             joinChannel();
         }
         if (callType == EaseCallType.CONFERENCE_VIDEO_CALL) {
@@ -585,7 +583,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     }
 
     private void sendAgreeMessage() {
-        //Sending an Answer Message(发送接听消息)
+        //Sending an Answer Message
         EaseCallAnswerEvent event = new EaseCallAnswerEvent();
         event.result = EaseCallMsgUtils.CALL_ANSWER_ACCEPT;
         event.callId = EaseCallKit.getInstance().getCallID();
@@ -628,12 +626,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             }
             mRtcEngine = RtcEngine.create(getBaseContext(), agoraAppId, mRtcEventHandler);
 
-            //Because there is a applet set to live mode, the role is set to master(因为有小程序 设置为直播模式 角色设置为主播)
+            //Because there is a applet set to live mode, the role is set to master
             mRtcEngine.setChannelProfile(CHANNEL_PROFILE_LIVE_BROADCASTING);
             mRtcEngine.setClientRole(CLIENT_ROLE_BROADCASTER);
 
             EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
-            // Set the small window hover type(设置小窗口悬浮类型)
+            // Set the small window hover type
             EaseCallFloatWindow.getInstance().setCallType(callType);
         } catch (Exception e) {
             EMLog.e(TAG, Log.getStackTraceString(e));
@@ -652,7 +650,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 VideoEncoderConfiguration.STANDARD_BITRATE,
                 VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT));
 
-        //Enable detection of who is talking(启动谁在说话检测)
+        //Enable detection of who is talking
         mRtcEngine.enableAudioVolumeIndication(500, 3, false);
     }
 
@@ -705,7 +703,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             listener.onGenerateRTCToken(ChatClient.getInstance().getCurrentUser(), channelName, new EaseCallKitTokenCallback() {
                 @Override
                 public void onSetToken(String token, int uId) {
-                    //gets agora RTC token ,then join channel (获取到RTC Token uid加入频道)
+                    //gets agora RTC token ,then join channel
                     mRtcEngine.joinChannel(token, channelName, null, uId);
                     //add uid to inChannelAccounts
                     inChannelAccounts.put(uId, new EaseUserAccount(uId, ChatClient.getInstance().getCurrentUser()));
@@ -714,12 +712,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 @Override
                 public void onGetTokenError(int error, String errorMsg) {
                     EMLog.e(TAG, "onGenerateToken error :" + ChatClient.getInstance().getAccessToken());
-                    // Failed to obtain the RTC Token(获取RTC Token失败,退出呼叫)
+                    // Failed to obtain the RTC Token
                     exitChannel();
                 }
             });
         } else {
-            //Don't checkout token(不校验token)
+            //Don't checkout token
             mRtcEngine.joinChannel(null, channelName, null, 0);
             //add uid to inChannelAccounts
             inChannelAccounts.put(0, new EaseUserAccount(0, ChatClient.getInstance().getCurrentUser()));
@@ -808,7 +806,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
 
     /**
-     * add livedate listener (增加LiveData监听)
+     * add liveDate listener
      */
     protected void addLiveDataObserver() {
         EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString(), EaseCallBaseEvent.class).observe(this, event -> {
@@ -816,35 +814,35 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 switch (event.callAction) {
                     case CALL_ALERT:
                         EaseCallAlertEvent alertEvent = (EaseCallAlertEvent) event;
-                        //Determine whether the session is valid(判断会话是否有效)
+                        //Determine whether the session is valid
                         EaseCallConfirmRingEvent ringEvent = new EaseCallConfirmRingEvent();
                         String user = alertEvent.userId;
                         if (TextUtils.equals(alertEvent.callId, EaseCallKit.getInstance().getCallID())
                                 && invitedUsersTime.containsKey(user)) {
-                            //Send a valid session message(发送会话有效消息)
+                            //Send a valid session message
                             ringEvent.calleeDevId = alertEvent.calleeDevId;
                             ringEvent.valid = true;
                             ringEvent.userId = alertEvent.userId;
                             sendCmdMsg(ringEvent, alertEvent.userId);
                         } else {
-                            //Invalid session message was sent(发送会话无效消息)
+                            //Invalid session message was sent
                             ringEvent.calleeDevId = alertEvent.calleeDevId;
                             ringEvent.valid = false;
                             sendCmdMsg(ringEvent, alertEvent.userId);
                         }
-                        //A session confirmation message has been sent.(已经发送过会话确认消息)
+                        //A session confirmation message has been sent.
                         mConfirRing = true;
                         break;
                     case CALL_CANCEL:
                         if (userIdAndUidMap.get(event.userId) == null && !TextUtils.equals(event.userId, ChatClient.getInstance().getCurrentUser())) {
-                            //An event sent by a strange third party(陌生的第三者发的event)
+                            //An event sent by a strange third party
                             break;
                         }
                         if (!isInComingCall) {
-                            //Stop quorum timer(停止仲裁定时器)
+                            //Stop quorum timer
                             timeHandler.stopTime();
                         }
-                        //cancel call (取消通话)
+                        //cancel call
                         exitChannel();
                         break;
                     case CALL_ANSWER:
@@ -852,7 +850,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         EaseCallConfirmCallEvent callEvent = new EaseCallConfirmCallEvent();
                         callEvent.calleeDevId = answerEvent.calleeDevId;
                         callEvent.result = answerEvent.result;
-                        //remove form time recorder (删除超时机制)
+                        //remove form time recorder
                         String userId = answerEvent.userId;
                         invitedUsersTime.remove(userId);
 
@@ -861,9 +859,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        //The other party is busy(对方正在忙碌中)
+                                        //The other party is busy
                                         effectiveUsers.remove(userId);
-                                        //Delete placeholders (删除占位符)
+                                        //Delete placeholders
                                         EaseCallMemberView placeView = placeholders.remove(userId);
                                         if (placeView != null) {
                                             mBinding.surfaceViewGroup.removeView(placeView);
@@ -871,7 +869,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                         if (listener != null) {
                                             listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, timeUpdataTimer.timePassed * 1000);
                                         }
-                                        // check placeholders state (检查placeholders状态)
+                                        // check placeholders state
                                         if (placeholders.size() == 0) {
                                             EaseCallAudioControl.getInstance().stopPlayRing();
                                         }
@@ -881,7 +879,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                 sendCmdMsg(callEvent, username);
                             }
                         } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                            //set call answered state (设置为接听)
+                            //set call answered state
                             EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
                             sendCmdMsg(callEvent, answerEvent.userId);
                         } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
@@ -890,7 +888,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                 @Override
                                 public void run() {
                                     effectiveUsers.remove(userId);
-                                    //Delete placeholders (删除占位符)
+                                    //Delete placeholders
                                     EaseCallMemberView placeView = placeholders.remove(userId);
                                     if (placeView != null) {
                                         mBinding.surfaceViewGroup.removeView(placeView);
@@ -900,7 +898,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                             if (listener != null) {
                                 listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRefuse, 0);
                             }
-                            //  check placeholders state (检查placeholders状态)
+                            //  check placeholders state
                             if (placeholders.size() == 0) {
                                 EaseCallAudioControl.getInstance().stopPlayRing();
                             }
@@ -913,39 +911,18 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         String deviceId = confirmEvent.calleeDevId;
                         String result = confirmEvent.result;
                         timeHandler.stopTime();
-                        //is self (收到的仲裁为自己设备)
+                        //is self
                         if (TextUtils.equals(deviceId, EaseCallKit.deviceId)) {
-                            //answer accept(收到的仲裁为接听)
+                            //answer accept
                             if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
                                 joinChannel();
                             } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
                                 //exit call
                                 exitChannel();
-                                if (listener != null) {
-                                    listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRefuse, 0);
-                                }
                             }
                         } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //handled in another device (提示已在其他设备处理)
-                                    EaseCallEndReason reason = null;
-                                    if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                                        //agreed in another device (已经在其他设备接听)
-                                        reason = EaseCallEndReasonHandleOnOtherDeviceAgreed;
-                                    } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
-                                        //refused in another device(已经在其他设备拒绝)
-                                        reason = EaseCallEndReasonHandleOnOtherDeviceRefused;
-                                    }
-                                    //exit call(退出通话)
-                                    exitChannel();
-                                    if (listener != null) {
-                                        //handled in another device(已经在其他设备处理)
-                                        listener.onEndCallWithReason(callType, channelName, reason, 0);
-                                    }
-                                }
-                            });
+                            //exit call
+                            exitChannel();
                         }
                         break;
                 }
@@ -978,7 +955,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     private EaseCallCommingCallView.OnActionListener onActionListener = new EaseCallCommingCallView.OnActionListener() {
         @Override
         public void onPickupClick(View v) {
-            //stop ring(停止震铃)
+            //stop ring
             EaseCallAudioControl.getInstance().stopPlayRing();
             addLocalViewToConferenceViewsGroup();
             mBinding.incomingCallView.setVisibility(View.GONE);
@@ -989,7 +966,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
         @Override
         public void onMuteVideoClick(View v) {
-            //stop preview(禁止图像)
+            //stop preview
             if (isPreview) {
                 mRtcEngine.stopPreview();
                 localMemberView.setVisibility(View.GONE);
@@ -1013,10 +990,10 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
         @Override
         public void onRejectClick(View v) {
-            //stop ring(停止震铃)
+            //stop ring
             if (isInComingCall) {
                 EaseCallAudioControl.getInstance().stopPlayRing();
-                //send refused message(发送拒绝消息)
+                //send refused message
                 EaseCallAnswerEvent event = new EaseCallAnswerEvent();
                 event.result = EaseCallMsgUtils.CALL_ANSWER_REFUSE;
                 event.callId = EaseCallKit.getInstance().getCallID();
@@ -1038,9 +1015,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     private EaseCallMemberViewGroup.OnScreenModeChangeListener onScreenModeChangeListener = new EaseCallMemberViewGroup.OnScreenModeChangeListener() {
         @Override
         public void onScreenModeChange(boolean isFullScreenMode, @Nullable View fullScreenView) {
-            if (isFullScreenMode) { // (fullScreen)全屏模式
+            if (isFullScreenMode) { // (fullScreen)
                 mBinding.rlVideoControl.setVisibility(View.GONE);
-            } else { // (not fullscreen)非全屏模式
+            } else { // (not fullscreen)
                 mBinding.rlVideoControl.setVisibility(View.VISIBLE);
             }
         }
@@ -1059,7 +1036,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    //update time (更新时间)
+    //update time
     private void updateConferenceTime(String time) {
         Log.e(TAG, "time: " + time);
         mBinding.tvCallTime.setText(time);
@@ -1097,14 +1074,14 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         public void handleMessage(Message msg) {
             if (msg.what == CALL_TIMER_TIMEOUT) {
                 timePassed++;
-                if (!isInComingCall) { //如果是主叫
+                if (!isInComingCall) {
                     long totalMilliSeconds = System.currentTimeMillis();
                     Iterator<String> itUser = invitedUsersTime.keySet().iterator();
                     while (itUser.hasNext()) {
                         String userName = itUser.next();
-                        //Check whether the current time times out(判断当前时间是否超时)
+                        //Check whether the current time times out
                         if (totalMilliSeconds >= invitedUsersTime.get(userName)) {
-                            //send cancel event (发送取消事件)
+                            //send cancel event
                             EaseCallCallCancelEvent cancelEvent = new EaseCallCallCancelEvent();
                             cancelEvent.callId = EaseCallKit.getInstance().getCallID();
                             sendCmdMsg(cancelEvent, userName);
@@ -1132,10 +1109,10 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     sendEmptyMessageDelayed(CALL_TIMER_TIMEOUT, 1000);
                     if (timePassed * 1000 == intervalTime) {
                         timeHandler.stopTime();
-                        //The called party waiting for the arbitration message timed out(被叫等待仲裁消息超时)
+                        //The called party waiting for the arbitration message timed out
                         exitChannel();
                         if (listener != null) {
-                            //Reply timed out(对方回复超时)
+                            //Reply timed out
                             listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRemoteNoResponse, 0);
                         }
                     }
@@ -1162,16 +1139,16 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         public void handleMessage(Message msg) {
             int what = msg.what;
             switch (what) {
-                case MSG_MAKE_SIGNAL_VOICE: // 1V1 voice call (语音通话)
+                case MSG_MAKE_SIGNAL_VOICE: // 1V1 voice call
                     break;
-                case MSG_MAKE_SIGNAL_VIDEO: // 1V1 video call (视频通话)
+                case MSG_MAKE_SIGNAL_VIDEO: // 1V1 video call
                     break;
-                case MSG_MAKE_CONFERENCE_VIDEO: // multiply video or audio call (多人音视频通话)
+                case MSG_MAKE_CONFERENCE_VIDEO: // multiply video or audio call
                     ArrayList<String> sendInviteeMsg = EaseCallKit.getInstance().getInviteeUsers();
                     sendInviteeMsg(sendInviteeMsg);
                     break;
-                case MSG_RELEASE_HANDLER: // remote loop message(停止事件循环)
-                    //Preventing memory leaks(防止内存泄漏)
+                case MSG_RELEASE_HANDLER: // remote loop message
+                    //Preventing memory leaks
                     handler.removeMessages(MSG_MAKE_SIGNAL_VOICE);
                     handler.removeMessages(MSG_MAKE_SIGNAL_VIDEO);
                     handler.removeMessages(MSG_MAKE_CONFERENCE_VIDEO);
@@ -1188,13 +1165,13 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
      * @param userArray
      */
     private void sendInviteeMsg(ArrayList<String> userArray) {
-        //start invite timer (开始定时器)
+        //start invite timer
         isInComingCall = false;
         timeHandler.startTime(CALL_TIMER_TIMEOUT);
         for (String username : userArray) {
             if (!placeholders.containsKey(username) && !userIdAndUidMap.containsKey(username)) {
 
-                //update user nickname and image (更新头像昵称)
+                //update user nickname and image
                 notifyUserToUpdateUserInfo(username,0);
 
                 long totalMilliSeconds = System.currentTimeMillis();
@@ -1207,13 +1184,13 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 }
                 totalMilliSeconds += intervalTime;
 
-                //put total time in invitedUsersTime (放入超时时间)
+                //put total time in invitedUsersTime
                 invitedUsersTime.put(username, totalMilliSeconds);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //show placeholder (显示占位符)
+                        //show placeholder
                         final EaseCallMemberView memberView = new EaseCallMemberView(getApplicationContext());
                         memberView.setUserInfo(new EaseUserAccount(0, username));
 //                        memberView.setLoading(true);
@@ -1230,16 +1207,17 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invite_you_for_audio_call), username);
                 }
                 setInviteeMessageAttr(message);
+
                 ChatClient.getInstance().chatManager().sendMessage(message);
             }
         }
 
-        //send a message to a group (给群里发送一条消息)
+        //send a message to a group
         final ChatMessage message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invited_to_make_multi_party_call), groupId);
         message.setChatType(ChatMessage.ChatType.GroupChat);
         setInviteeMessageAttr(message);
         ChatClient.getInstance().chatManager().sendMessage(message);
-        //init inviteeUsers(初始化邀请列表)
+        //init inviteeUsers
         EaseCallKit.getInstance().InitInviteeUsers();
     }
 
@@ -1266,7 +1244,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         message.setAttribute(EaseCallMsgUtils.CLL_TIMESTRAMEP, System.currentTimeMillis());
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);
 
-        //add push ext (增加推送字段)
+        //add push ext
         JSONObject extObject = new JSONObject();
         try {
             String info = getApplication().getString(R.string.ease_call_alert_request_multiple_video, ChatClient.getInstance().getCurrentUser());
@@ -1274,10 +1252,29 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             extObject.putOpt("em_push_content", info);
             extObject.putOpt("isRtcCall", true);
             extObject.putOpt("callType", EaseCallType.CONFERENCE_VIDEO_CALL.code);
+
+            if(message.getChatType()== ChatMessage.ChatType.Chat) {
+                extObject.putOpt("em_push_type", "voip");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         message.setAttribute("em_apns_ext", extObject);
+
+        if(message.getChatType()== ChatMessage.ChatType.Chat) {
+            try {
+                JSONObject pushExtObject = new JSONObject();
+                pushExtObject.putOpt("type","call");
+
+                JSONObject customObject = new JSONObject();
+                customObject.putOpt("callId",EaseCallKit.getInstance().getCallID());
+                pushExtObject.putOpt("custom",customObject);
+
+                message.setAttribute("em_push_ext",pushExtObject);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
 
         final Conversation conversation = ChatClient.getInstance().chatManager().getConversation(username, Conversation.ConversationType.Chat, true);
         message.setMessageStatusCallback(new CallBack() {
@@ -1307,7 +1304,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     }
 
     /**
-     * send cmd message (发送CMD回复信息)
+     * send cmd message
      *
      * @param username
      */
@@ -1420,12 +1417,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 } else {
                     localMemberView.updateUserInfo();
                 }
-                //Delete placeholders (删除占位符)
+                //Delete placeholders
                 EaseCallMemberView placeView = placeholders.remove(account.getUserName());
                 if (placeView != null) {
                     mBinding.surfaceViewGroup.removeView(placeView);
                 }
-                //update user nickname and image(通知更新昵称头像)
+                //update user nickname and image
                 if (TextUtils.equals(account.getUserName(), username)) {
                     if (mBinding.incomingCallView != null) {
                         mBinding.incomingCallView.setInviteInfo(account.getUserName(), groupId, callType);
@@ -1473,7 +1470,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     }
 
     private void updateUserInfo(int uid) {
-        //update userinfo in local view (更新本地头像昵称)
+        //update userinfo in local view
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1516,7 +1513,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         Iterator<String> it_user = invitedUsersTime.keySet().iterator();
                         while (it_user.hasNext()) {
                             String userName = it_user.next();
-                            //send cancel envent (发送取消事件)
+                            //send cancel event
                             EaseCallCallCancelEvent cancelEvent = new EaseCallCallCancelEvent();
                             cancelEvent.callId = EaseCallKit.getInstance().getCallID();
                             sendCmdMsg(cancelEvent, userName);
@@ -1531,12 +1528,17 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 }
                 if (isFloatWindowShowing()) {
                     EaseCallFloatWindow.getInstance().dismiss();
+                }else{
+                    EaseCallFloatWindow.getInstance().resetCurrentInstance();
                 }
-                //insert a hangup message to local when in group chat (群聊消息时，本地插入一条挂断消息)
+                //insert a hangup message to local when in group chat
                 insertCancelMessageToLocal();
-                //reset state (重置状态)
+                //reset state
+                releaseHandler();
                 EaseCallKit.getInstance().setCallState(EaseCallState.CALL_IDLE);
                 EaseCallKit.getInstance().setCallID(null);
+                EaseCallKit.getInstance().releaseCall();
+                RtcEngine.destroy();
                 finish();
             }
         });
@@ -1649,7 +1651,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     resetVideoView();
                 }
             }
-            // Prevent the activity from being started in the background to the foreground, causing the Window to still exist(防止activity在后台被start至前台导致window还存在)
+            // Prevent the activity from being started in the background to the foreground, causing the Window to still exist
             long costSeconds = EaseCallFloatWindow.getInstance().getTotalCostSeconds();
             Log.e(TAG, "costSeconds: " + costSeconds);
             if (timeUpdataTimer != null) {
@@ -1658,17 +1660,17 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             }
             EaseCallFloatWindow.getInstance().dismiss();
         }
-        //After processing the data synchronization in the hover window(处理完悬浮窗中的数据同步之后)
+        //After processing the data synchronization in the hover window
         ArrayList<String> users = EaseCallKit.getInstance().getInviteeUsers();
         if (isNew) {
-            //is new in (新activity进来)
+            //is new in
             effectiveUsers.clear();
             effectiveUsers.addAll(EaseCallKit.getInstance().getInviteeUsers());
             for (Map.Entry<Integer, EaseUserAccount> entry : inChannelAccounts.entrySet()) {
                 effectiveUsers.add(entry.getValue().getUserName());
             }
         } else {
-            //will be added if have deference (有差异的会加进来)
+            //will be added if have deference
             effectiveUsers.addAll(users);
             if (users != null && users.size() > 0) {
                 handler.sendEmptyMessage(MSG_MAKE_CONFERENCE_VIDEO);
@@ -1731,7 +1733,15 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
 
     protected void releaseHandler() {
-        handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        if(handler!=null) {
+            handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        }
+        if (timeHandler != null) {
+            timeHandler.stopTime();
+        }
+        if (timeUpdataTimer != null) {
+            timeUpdataTimer.stopTime();
+        }
     }
 
     @Override
@@ -1739,12 +1749,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         super.onDestroy();
         mBinding.surfaceViewGroup.removeAllViews();
         releaseHandler();
-        if (timeHandler != null) {
-            timeHandler.stopTime();
-        }
-        if (timeUpdataTimer != null) {
-            timeUpdataTimer.stopTime();
-        }
         if (inChannelViews != null) {
             inChannelViews.clear();
         }
@@ -1755,9 +1759,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             if (inChannelAccounts != null) {
                 inChannelAccounts.clear();
             }
-            EaseCallKit.getInstance().releaseCall();
             leaveChannel();
-            RtcEngine.destroy();
+            //Avoid the effect of last instance delay release on this instance
+            if(TextUtils.equals(EaseCallFloatWindow.getInstance().getCurrentInstance(),this.toString())) {
+                EaseCallKit.getInstance().releaseCall();
+                RtcEngine.destroy();
+            }
         }
     }
 
@@ -1785,7 +1792,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
 
     /**
-     * whether to exit current call dialog hint (是否退出当前通话提示框)
+     * whether to exit current call dialog hint
      */
     public void exitChannelDisplay() {
         AlertDialog.Builder builder = new AlertDialog.Builder(EaseCallMultipleBaseActivity.this);

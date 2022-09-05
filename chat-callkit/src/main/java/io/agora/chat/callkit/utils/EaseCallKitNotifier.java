@@ -128,7 +128,7 @@ public class EaseCallKitNotifier {
     }
 
     /**
-     * 适用于android10以后，从后台启动 Activity 的限制
+     * Applicable to android10 and later, the limitation of starting Activity from the background
      * @param fullScreenIntent
      * @param title
      * @param content

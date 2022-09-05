@@ -8,6 +8,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
@@ -52,7 +53,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
     }
 
     private void init() {
-        //测量屏幕宽高,该view默认为全屏,若当前view不为全屏,则该计算方式需要修改.
+        //Measure the width and height of the screen. The default view is full screen. If the current view is not full screen, you need to modify the calculation method.
         WindowManager wm = (WindowManager) getContext()
                 .getSystemService(Context.WINDOW_SERVICE);
         Point p = new Point();
@@ -63,35 +64,35 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
     }
 
     /**
-     * 重写onMeasure方法，这里循环设置当前自定义控件的子控件的大小
+     * Override the onMeasure method, which loops to set the size of the child controls of the current custom control
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int heightMeasure = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        //存储最后计算出的高度
+        //Store the last calculated height
         int totalHeight = 0;
-        // 得到内部元素的个数
+        // Get the number of inner elements
         int count = getChildCount();
-        //存储子View
+        //Store Child View
         View child;
         int right = 0;
         pageCount = (getChildCount() - 1) / maxSizeOnePage + 1;
-        //遍历子View 计算父控件宽高
+        //Traverse the child View to calculate the width and height of the parent control
         for (int i = 0; i < count; i++) {
             child = getChildAt(i);
             if (View.GONE == child.getVisibility()) {
                 continue;
             }
-            //先测量子View
+            //Measurement Child View
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
-            //随机取一个item的高度都可以
+            //You can randomly choose the height of the item
             itemHeight = child.getMeasuredHeight();
             int p = i / maxSizeOnePage;// current page.
             right = Math.max(right, p * itemWidth * itemCountOneLine + itemWidth + getPaddingLeft() + getPaddingRight() + (i % maxSizeOnePage) / itemCountOneRow * itemWidth);
         }
 
-        //适配padding,如果是wrap_content,则除了子控件本身占据的控件，还要在加上父控件的padding
+        //Adapt to padding. If it is wrap_content, in addition to the controls occupied by the child control itself, the padding of the parent control should also be added.
         int measureHeiht = heightMode != MeasureSpec.EXACTLY ? totalHeight + getPaddingTop() + getPaddingBottom() : heightMeasure;
 
         if(isFullScreenMode()) {
@@ -118,7 +119,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        //子控件的个数
+        //Child View Count
         int count = getChildCount();
         int baseLeft = 0;
         int baseTop = 0;
@@ -152,13 +153,13 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
                 b = mHeight;
             } else {
                 if (p == 0) {
-                    //第一页左右排队
+                    //The first page is arranged left and right
                     l = baseLeft + getPaddingLeft() + (i % itemCountOneLine) * itemWidth;
                     t = baseTop + (i % maxSizeOnePage) / itemCountOneLine * itemHeight + getPaddingTop();
                     r = baseLeft + child.getMeasuredWidth() + getPaddingLeft() + (i % itemCountOneLine) * itemWidth;
                     b = baseTop + (i % maxSizeOnePage) / itemCountOneLine * itemHeight + child.getMeasuredHeight() + getPaddingTop();
                 } else {
-                    //第二页开始上下排队
+                    //The second page starts to arrange up and down
                     l = baseLeft + p * itemWidth * itemCountOneLine + getPaddingLeft() + (i % maxSizeOnePage) / itemCountOneRow * itemWidth;
                     t = baseTop + (i % maxSizeOnePage) % itemCountOneRow * itemHeight + getPaddingTop();
                     r = baseLeft + p * itemWidth * itemCountOneLine + child.getMeasuredWidth() + getPaddingLeft() + (i % maxSizeOnePage) / itemCountOneRow * itemWidth;
@@ -168,7 +169,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
             if (callType == EaseCallType.CONFERENCE_VIDEO_CALL) {
                 child.setOnClickListener(this);
             }
-            Log.d(TAG, "l=" + l + ",t=" + t + ",r=" + r + ",b=" + b + ",itemwidth=" + itemWidth);
+            Log.d(TAG, "l=" + l + ",t=" + t + ",r=" + r + ",b=" + b + ",itemWidth=" + itemWidth);
             child.layout(l, t, r, b);
         }
     }
@@ -196,10 +197,14 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
 
     @Override
     public void addView(View child) {
+        ViewParent parent = child.getParent();
+        if(parent!=null) {
+            ((ViewGroup)parent).removeView(child);
+        }
         super.addView(child);
         if (isFullScreenMode()) {
             EMLog.i(TAG, "addView, isFullScreenMode: " + isFullScreenMode());
-            // 全屏模式下不进行子view的大小设置和滑动
+            // The size setting and sliding of the child view are not performed in full screen mode
             return;
         }
         if (child instanceof EaseCallMemberView) {
@@ -222,7 +227,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
                 onScreenModeChangeListener.onScreenModeChange(isFullScreenMode(), fullScreenView);
             }
         } else {
-            // 仅当开启视频后才能被点击进入全屏
+            // Can only be clicked to enter full screen when video is turned on
             if (v instanceof EaseCallMemberView && !((EaseCallMemberView) v).isShowVideo()) {
                 fullScreen(v);
             }
@@ -237,7 +242,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
         if (onScreenModeChangeListener != null) {
             onScreenModeChangeListener.onScreenModeChange(isFullScreenMode(), fullScreenView);
         }
-        // 只更改child view所在页的所有子view的layout parameters.
+        // Only change the layout parameters of all child views on the page where the child view is located.
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             LayoutParams lp = child.getLayoutParams();
@@ -259,7 +264,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
     private void resetAllViews() {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (getChildCount() == 3 && i == 2&&callType==EaseCallType.CONFERENCE_VIDEO_CALL) {//设置只有三个时的特殊摆放
+            if (getChildCount() == 3 && i == 2&&callType==EaseCallType.CONFERENCE_VIDEO_CALL) {//Special placement when there are only three settings
                 setViewParams(child, getMeasuredWidth(), itemHeight);
             } else {
                 setViewParams(child, itemWidth, itemHeight);
@@ -312,7 +317,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
     }
 
     /**
-     * 设置子控件的点击监听
+     * Set Item Click Listener
      */
     public void setOnItemClickListener(OnItemClickListener listener) {
         onItemClickListener = listener;

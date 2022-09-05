@@ -80,6 +80,7 @@ public class EaseCallFloatWindow {
     };
     private TextView tvTime;
     private boolean isRemoteVideoMuted;
+    private String currentInstanceName;
 
     public EaseCallFloatWindow(Context context) {
         initFloatWindow(context);
@@ -125,7 +126,8 @@ public class EaseCallFloatWindow {
     }
 
     private void initFloatWindow(Context context) {
-        this.context = context;
+        currentInstanceName =context.toString();
+        this.context = context.getApplicationContext();
         windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
         windowManager.getDefaultDisplay().getSize(point);
@@ -313,10 +315,10 @@ public class EaseCallFloatWindow {
         }
         memberView = view;
         uId = memberView.getUserId();
-        if (memberView.isShowVideo()) { // 视频未开启
+        if (memberView.isShowVideo()) {
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.VISIBLE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.GONE);
-        } else { // 视频已开启
+        } else {
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.GONE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.VISIBLE);
 
@@ -337,6 +339,9 @@ public class EaseCallFloatWindow {
      * @param surface
      */
     public void update(boolean isSelf,String remoteUrl, int curUid, int remoteUid, boolean surface) {
+        if (floatView == null) {
+            return;
+        }
         if(singleCallInfo == null) {
             singleCallInfo = new SingleCallInfo();
         }
@@ -389,7 +394,7 @@ public class EaseCallFloatWindow {
     }
 
     /**
-     * 停止悬浮窗
+     * stop floating window
      */
     public void dismiss() {
         Log.i(TAG, "dismiss: ");
@@ -407,6 +412,15 @@ public class EaseCallFloatWindow {
             singleCallInfo = null;
         }
         handler.removeCallbacksAndMessages(null);
+        currentInstanceName=null;
+    }
+
+    public void resetCurrentInstance(){
+        currentInstanceName=null;
+    }
+
+    public String getCurrentInstance(){
+        return currentInstanceName;
     }
 
     /**
@@ -433,10 +447,10 @@ public class EaseCallFloatWindow {
         int targetX;
 
         if (left < splitLine) {
-            // 滑动到最左边
+            // swipe to the left
             targetX = 0;
         } else {
-            // 滑动到最右边
+            //swipe to the right
             targetX = screenWidth - floatViewWidth;
         }
 

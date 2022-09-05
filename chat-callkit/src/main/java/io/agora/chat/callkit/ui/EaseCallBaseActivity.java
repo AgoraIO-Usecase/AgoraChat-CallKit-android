@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -56,9 +57,9 @@ public class EaseCallBaseActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_IDLE) {
+        if (EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_IDLE
+                && TextUtils.equals(EaseCallFloatWindow.getInstance().getCurrentInstance(),this.toString())) {
             showFloatWindow();
         }
     }
-
 }

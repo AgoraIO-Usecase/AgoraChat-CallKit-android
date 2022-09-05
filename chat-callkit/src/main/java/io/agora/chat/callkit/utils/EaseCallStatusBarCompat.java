@@ -120,9 +120,9 @@ public class EaseCallStatusBarCompat {
                 darkModeFlag = field.getInt(layoutParams);
                 Method extraFlagField = clazz.getMethod("setExtraFlags", int.class, int.class);
                 if (dark) {
-                    extraFlagField.invoke(window, darkModeFlag, darkModeFlag);//状态栏透明且黑色字体
+                    extraFlagField.invoke(window, darkModeFlag, darkModeFlag);//Status bar transparent black font
                 } else {
-                    extraFlagField.invoke(window, 0, darkModeFlag);//清除黑色字体
+                    extraFlagField.invoke(window, 0, darkModeFlag);//clear black font
                 }
                 result = true;
 

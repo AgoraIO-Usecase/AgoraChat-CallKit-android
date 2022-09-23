@@ -33,10 +33,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -923,14 +925,33 @@ public class EaseCallKit {
     }
 
     private boolean isMainProcess(Context context) {
-        int pid = android.os.Process.myPid();
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningAppProcessInfo appProcess : activityManager.getRunningAppProcesses()) {
-            if (appProcess.pid == pid) {
-                return TextUtils.equals(context.getApplicationInfo().packageName, appProcess.processName);
-            }
+        String processName;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            processName = getProcessNameByApplication();
+        }else {
+            processName = getProcessNameByReflection();
         }
-        return false;
+        return context.getApplicationInfo().packageName.equals(processName);
+    }
+
+    private String getProcessNameByReflection() {
+        String processName = null;
+        try {
+            final Method declaredMethod = Class.forName("android.app.ActivityThread", false, Application.class.getClassLoader())
+                    .getDeclaredMethod("currentProcessName", (Class<?>[]) new Class[0]);
+            declaredMethod.setAccessible(true);
+            final Object invoke = declaredMethod.invoke(null, new Object[0]);
+            if (invoke instanceof String) {
+                processName = (String) invoke;
+            }
+        } catch (Throwable e) {
+        }
+        return processName;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private String getProcessNameByApplication() {
+        return Application.getProcessName();
     }
 
 

@@ -33,8 +33,9 @@ Take the following steps to integrate the AgoraChatCallKit into your project and
     In `/Gradle Scripts/build.gradle(Module: <projectname>.app)`, add the following lines to integrate the AgoraChatCallKit into your Android project:
 
     ```java
-    implementation 'io.agora.rtc:chat-callkit:1.0.1'
+    implementation 'io.agora.rtc:chat-callkit:1.0.8'
     ```
+<div class="alert note"><ul><li>For the latest callkit version, go to <a href="https://search.maven.org/search?q=a:chat-callkit">Sonatype</a>.</li></ul></div>
 
 2. Add project permissions
 

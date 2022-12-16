@@ -525,12 +525,6 @@ public class EaseCallKit {
                         String fromUser = message.getFrom();
                         String channel = message.getStringAttribute(EaseCallMsgUtils.CALL_CHANNELNAME, "");
                         EaseCallAction callAction = EaseCallAction.getfrom(action);
-                        JSONObject ext = null;
-                        try {
-                            ext = message.getJSONObjectAttribute(CALL_INVITE_EXT);
-                        } catch (ChatException exception) {
-                            exception.printStackTrace();
-                        }
 
                         if (action == null || callerDevId == null || fromCallId == null || fromUser == null || channel == null) {
                             if (callListener != null) {

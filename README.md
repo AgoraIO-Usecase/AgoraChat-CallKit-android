@@ -20,7 +20,7 @@ Before proceeding, ensure that your development environment meets the following 
 - `targetSdkVersion` 30.
 - `minSdkVersion` 21.
 - Gradle 4.6 or later.
-- An Agora Chat project that has integrated the Chat SDK and implemented the [basic real-time chat functionalities](./agora_chat_get_started_android?platform=Android), including users logging in and out and sending and receiving messages.
+- An Agora Chat project that has integrated the Chat SDK and implemented the [basic real-time chat functionalities](https://docs.agora.io/en/agora-chat/get-started/get-started-sdk), including users logging in and out and sending and receiving messages.
 
 ## Project setup
 
@@ -33,8 +33,9 @@ Take the following steps to integrate the AgoraChatCallKit into your project and
     In `/Gradle Scripts/build.gradle(Module: <projectname>.app)`, add the following lines to integrate the AgoraChatCallKit into your Android project:
 
     ```java
-    implementation 'io.agora.rtc:chat-callkit:1.0.1'
+    implementation 'io.agora.rtc:chat-callkit:1.0.8'
     ```
+<div class="alert note"><ul><li>For the latest callkit version, go to <a href="https://search.maven.org/search?q=a:chat-callkit">Sonatype</a>.</li></ul></div>
 
 2. Add project permissions
 
@@ -337,7 +338,7 @@ void onUserInfoUpdate(String userName){
 
 ### Authenticate users with the RTC token
 
-To enhance communication security, Agora recommends that you authenticate app users with the RTC token before they join a call. To do this, you need to make sure that the [Primary Certificate of your project is enabled](https://docs.agora.io/en/All/faq/appid_to_token), and `setEnableRTCToken` in the AgoraChatCallKit is set to `true`.
+To enhance communication security, Agora recommends that you authenticate app users with the RTC token before they join a call. To do this, you need to make sure that the [Primary Certificate of your project is enabled](https://docs.agora.io/en/agora-chat/reference/manage-agora-account#enable-the-primary-certificate), and `setEnableRTCToken` in the AgoraChatCallKit is set to `true`.
 
 ```java
 EaseCallKitConfig callKitConfig = new EaseCallKitConfig();
@@ -353,7 +354,7 @@ Once you enable token authentication, the SDK triggers the `onGenerateRTCToken` 
 2. Trigger `onSetToken` to pass the token and UID to the callback object.
 3. AgoraChatCallKit uses the token and UID to join the channel.
 
-Tokens are generated on your app server using the token generator provided by Agora. For how to generate a token on the server and retrieve and renew the token on the client, see [Authenticate Your Users with Tokens](https://docs.agora.io/en/Video/token_server?platform=android).
+Tokens are generated on your app server using the token generator provided by Agora. For how to generate a token on the server and retrieve and renew the token on the client, see [Authenticate Your Users with Tokens](https://docs.agora.io/en/video-calling/develop/authentication-workflow).
 
 
 ```java
@@ -372,7 +373,7 @@ default void onGenerateRTCToken(String userId, String channelName, EaseCallKitTo
 
 ### Push notifications
 
-In scenarios where the app runs on the background or goes offline, use push notifications to ensure that the callee receives the call invitation. To enable push notifications, see [Set up push notifications](./agora_chat_push_android?platform=Android). 
+In scenarios where the app runs on the background or goes offline, use push notifications to ensure that the callee receives the call invitation. To enable push notifications, see [Set up push notifications](https://docs.agora.io/en/agora-chat/develop/offline-push#set-up-push-notifications). 
 
 Once push notifications are enabled, when a call invitation arrives, a notification message pops out on the notification panel. Users can click the message to see the call invitation.
 

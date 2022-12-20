@@ -624,13 +624,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             if (config != null) {
                 agoraAppId = config.getAgoraAppId();
             }
-            mRtcEngine = RtcEngine.create(getBaseContext(), agoraAppId, mRtcEventHandler);
+            mRtcEngine = RtcEngine.create(getApplicationContext(), agoraAppId, mRtcEventHandler);
 
             //Because there is a applet set to live mode, the role is set to master
             mRtcEngine.setChannelProfile(CHANNEL_PROFILE_LIVE_BROADCASTING);
             mRtcEngine.setClientRole(CLIENT_ROLE_BROADCASTER);
 
-            EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
             // Set the small window hover type
             EaseCallFloatWindow.getInstance().setCallType(callType);
         } catch (Exception e) {
@@ -1568,6 +1567,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             Log.e(TAG, "timeUpdataTimer cost seconds: " + timeUpdataTimer.timePassed);
             EaseCallFloatWindow.getInstance().setCostSeconds(timeUpdataTimer.timePassed);
         }
+        EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
         EaseCallFloatWindow.getInstance().show();
         setConferenceInfoAfterShowFloat();
         int uid = 0;

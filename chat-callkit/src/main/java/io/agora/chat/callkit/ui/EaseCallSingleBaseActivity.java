@@ -523,11 +523,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             if (config != null) {
                 agoraAppId = config.getAgoraAppId();
             }
-            mRtcEngine = RtcEngine.create(getBaseContext(), agoraAppId, mRtcEventHandler);
+            mRtcEngine = RtcEngine.create(getApplicationContext(), agoraAppId, mRtcEventHandler);
             //// Because there is a applet set to live mode, the role is set to master
             mRtcEngine.setChannelProfile(CHANNEL_PROFILE_LIVE_BROADCASTING);
             mRtcEngine.setClientRole(CLIENT_ROLE_BROADCASTER);
-            EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
         } catch (Exception e) {
             EMLog.e(TAG, Log.getStackTraceString(e));
             throw new RuntimeException("NEED TO check rtc sdk init fatal error\n" + Log.getStackTraceString(e));
@@ -1545,6 +1544,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         if (mBinding.chronometer != null) {
             EaseCallFloatWindow.getInstance().setCostSeconds(mBinding.chronometer.getCostSeconds());
         }
+        EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
         EaseCallFloatWindow.getInstance().show();
         boolean surface = true;
         if (isInComingCall && EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_ANSWERED) {

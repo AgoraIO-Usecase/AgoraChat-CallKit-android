@@ -9,17 +9,18 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_CONFERENCE_V
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VIDEO;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VOICE;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_RELEASE_HANDLER;
-import static io.agora.rtc.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
-import static io.agora.rtc.Constants.CLIENT_ROLE_BROADCASTER;
-import static io.agora.rtc.Constants.REMOTE_AUDIO_REASON_REMOTE_MUTED;
-import static io.agora.rtc.Constants.REMOTE_AUDIO_REASON_REMOTE_UNMUTED;
-import static io.agora.rtc.Constants.REMOTE_AUDIO_STATE_DECODING;
-import static io.agora.rtc.Constants.REMOTE_AUDIO_STATE_STARTING;
-import static io.agora.rtc.Constants.REMOTE_AUDIO_STATE_STOPPED;
-import static io.agora.rtc.Constants.REMOTE_VIDEO_STATE_DECODING;
-import static io.agora.rtc.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
-import static io.agora.rtc.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
-import static io.agora.rtc.Constants.REMOTE_VIDEO_STATE_STOPPED;
+import static io.agora.rtc2.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
+import static io.agora.rtc2.Constants.CLIENT_ROLE_BROADCASTER;
+import static io.agora.rtc2.Constants.REMOTE_AUDIO_REASON_REMOTE_MUTED;
+import static io.agora.rtc2.Constants.REMOTE_AUDIO_REASON_REMOTE_UNMUTED;
+import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_DECODING;
+import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STARTING;
+import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STOPPED;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STARTING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -94,11 +95,12 @@ import io.agora.chat.callkit.utils.EaseCallMsgUtils;
 import io.agora.chat.callkit.widget.EaseCallCommingCallView;
 import io.agora.chat.callkit.widget.EaseCallMemberView;
 import io.agora.chat.callkit.widget.EaseCallMemberViewGroup;
-import io.agora.rtc.IRtcEngineEventHandler;
-import io.agora.rtc.RtcEngine;
-import io.agora.rtc.models.UserInfo;
-import io.agora.rtc.video.VideoCanvas;
-import io.agora.rtc.video.VideoEncoderConfiguration;
+import io.agora.rtc2.ClientRoleOptions;
+import io.agora.rtc2.IRtcEngineEventHandler;
+import io.agora.rtc2.RtcEngine;
+import io.agora.rtc2.UserInfo;
+import io.agora.rtc2.video.VideoCanvas;
+import io.agora.rtc2.video.VideoEncoderConfiguration;
 import io.agora.util.EMLog;
 
 
@@ -188,8 +190,8 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
 
         @Override
-        public void onClientRoleChanged(int oldRole, int newRole) {
-            super.onClientRoleChanged(oldRole, newRole);
+        public void onClientRoleChanged(int oldRole, int newRole, ClientRoleOptions newRoleOptions) {
+            super.onClientRoleChanged(oldRole, newRole, newRoleOptions);
         }
 
         @Override
@@ -348,11 +350,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     if (memberView != null) {
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
                             memberView.showVideo(true);
-                        } else if (state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             memberView.showVideo(false);
                         }
 
-                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             // Determine the video is the current hover window update hover window
                             EaseCallMemberView floatView = EaseCallFloatWindow.getInstance().getCallMemberView();
                             if (floatView != null && floatView.getUserId() == uid) {

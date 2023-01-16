@@ -8,8 +8,8 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.CALL_INVITE_EXT;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VIDEO;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VOICE;
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_RELEASE_HANDLER;
-import static io.agora.rtc.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
-import static io.agora.rtc.Constants.CLIENT_ROLE_BROADCASTER;
+import static io.agora.rtc2.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
+import static io.agora.rtc2.Constants.CLIENT_ROLE_BROADCASTER;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -81,10 +81,10 @@ import io.agora.chat.callkit.utils.EaseCallAudioControl;
 import io.agora.chat.callkit.utils.EaseCallKitUtils;
 import io.agora.chat.callkit.utils.EaseCallMsgUtils;
 import io.agora.chat.callkit.widget.EaseCallChronometer;
-import io.agora.rtc.IRtcEngineEventHandler;
-import io.agora.rtc.RtcEngine;
-import io.agora.rtc.video.VideoCanvas;
-import io.agora.rtc.video.VideoEncoderConfiguration;
+import io.agora.rtc2.IRtcEngineEventHandler;
+import io.agora.rtc2.RtcEngine;
+import io.agora.rtc2.video.VideoCanvas;
+import io.agora.rtc2.video.VideoEncoderConfiguration;
 import io.agora.util.EMLog;
 
 

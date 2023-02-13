@@ -13,7 +13,6 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.CALL_INVITE_EXT;
 import static io.agora.chat.callkit.utils.EaseCallStatusBarCompat.getStatusBarHeight;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -50,6 +49,8 @@ import io.agora.chat.ChatClient;
 import io.agora.chat.ChatMessage;
 import io.agora.chat.CmdMessageBody;
 import io.agora.chat.Conversation;
+import io.agora.chat.GroupReadAck;
+import io.agora.chat.MessageReactionChange;
 import io.agora.chat.callkit.bean.EaseCallInfo;
 import io.agora.chat.callkit.event.EaseCallAlertEvent;
 import io.agora.chat.callkit.event.EaseCallAnswerEvent;

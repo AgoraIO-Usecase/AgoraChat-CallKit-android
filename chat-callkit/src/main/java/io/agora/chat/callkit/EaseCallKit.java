@@ -693,24 +693,25 @@ public class EaseCallKit {
             }
 
             @Override
-            public void onMessageRead(List<ChatMessage> messages) {
-
-            }
+            public void onMessageRead(List<ChatMessage> messages) {}
 
             @Override
-            public void onMessageDelivered(List<ChatMessage> messages) {
-
-            }
+            public void onGroupMessageRead(List<GroupReadAck> groupReadAcks) {}
 
             @Override
-            public void onMessageRecalled(List<ChatMessage> messages) {
-
-            }
+            public void onMessageDelivered(List<ChatMessage> messages) {}
 
             @Override
-            public void onMessageChanged(ChatMessage message, Object change) {
+            public void onMessageRecalled(List<ChatMessage> messages) {}
 
-            }
+            @Override
+            public void onMessageChanged(ChatMessage message, Object change) {}
+
+            @Override
+            public void onReadAckForGroupMessageUpdated() {}
+
+            @Override
+            public void onReactionChanged(List<MessageReactionChange> messageReactionChangeList) {}
         };
         // add message listening
         ChatClient.getInstance().chatManager().addMessageListener(this.messageListener);

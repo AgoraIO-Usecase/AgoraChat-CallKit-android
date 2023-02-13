@@ -120,6 +120,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     private int idInOppositeSurfaceLayout = -1;
     protected EaseCallType callType;
     private TimeHandler timehandler;
+    private InComingCallHandler inComingCallHandler;
     private DateFormat dateFormat = null;
     private RtcEngine mRtcEngine;
     private boolean isLocalVideoMuted = false;
@@ -140,6 +141,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             EMLog.d(TAG, "IRtcEngineEventHandler onError:" + err);
             if (listener != null) {
                 listener.onCallError(EaseCallError.RTC_ERROR, err, "rtc error");
+            }
+            if(inComingCallHandler != null) {
+                inComingCallHandler.stopTime();
             }
         }
 
@@ -164,6 +168,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         }
                         //start invite time record
                         timehandler.startTime();
+                    }
+                    if(inComingCallHandler != null) {
+                        inComingCallHandler.stopTime();
                     }
                 }
             });
@@ -292,6 +299,12 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         checkFloatIntent(getIntent());
         addLiveDataObserver();
         timehandler = new TimeHandler();
+        if(isInComingCall) {
+            if(inComingCallHandler == null) {
+                inComingCallHandler = new InComingCallHandler();
+            }
+            inComingCallHandler.startTime();
+        }
         dateFormat = new SimpleDateFormat("HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -702,6 +715,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             } else {
                 //send voice to voice event
                 EaseCallVideoToVoiceeEvent event = new EaseCallVideoToVoiceeEvent();
+                event.callId = EaseCallKit.getInstance().getCallID();
                 sendCmdMsg(event, username);
             }
         } else if (id == R.id.iv_vidicon_video_called || id == R.id.iv_vidicon_video_calling) {
@@ -1168,9 +1182,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             e.printStackTrace();
         }
 
-        if (EaseCallKit.getInstance().getCallID() == null) {
-            EaseCallKit.getInstance().setCallID(EaseCallKitUtils.getRandomString(10));
-        }
+        EaseCallKit.getInstance().setCallID(EaseCallKitUtils.getRandomString(10));
         message.setAttribute(EaseCallMsgUtils.CLL_ID, EaseCallKit.getInstance().getCallID());
 
         message.setAttribute(EaseCallMsgUtils.CLL_TIMESTRAMEP, System.currentTimeMillis());
@@ -1310,6 +1322,47 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 EaseCallKit.getInstance().setCallID(null);
             }
         });
+    }
+
+    private class InComingCallHandler extends Handler {
+        private int timePassed = 0;
+        private final int MSG_TIMER = 1;
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if (msg.what == MSG_TIMER) {
+                timePassed++;
+                Log.e("TAG", "incomming call timePassed: " + timePassed);
+                long intervalTime;
+                EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
+                if (callKitConfig != null) {
+                    intervalTime = callKitConfig.getCallTimeOut();
+                } else {
+                    intervalTime = EaseCallMsgUtils.CALL_INVITE_INTERVAL;
+                }
+                if (timePassed * 1000 == intervalTime) {
+                    //被呼叫超时
+                    stopTime();
+                    exitChannel();
+                    if (listener != null) {
+                        //对方接通超时
+                        listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonNoResponse, 0);
+                    }
+                } else {
+                    sendEmptyMessageDelayed(MSG_TIMER, 1000);
+                }
+            }
+        }
+
+        public void startTime() {
+            timePassed = 0;
+            removeMessages(MSG_TIMER);
+            sendEmptyMessageDelayed(MSG_TIMER, 1000);
+        }
+
+        public void stopTime() {
+            removeMessages(MSG_TIMER);
+        }
     }
 
     private class TimeHandler extends Handler {
@@ -1591,6 +1644,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     protected void releaseHandler() {
         if(handler!=null) {
             handler.sendEmptyMessage(MSG_RELEASE_HANDLER);
+        }
+        if(inComingCallHandler != null) {
+            inComingCallHandler.removeCallbacksAndMessages(null);
+            inComingCallHandler = null;
         }
         if (timehandler != null) {
             timehandler.stopTime();

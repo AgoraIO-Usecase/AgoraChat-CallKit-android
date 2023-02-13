@@ -763,7 +763,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 mRtcEngine.switchCamera();
             }
             this.isCameraFront = isFront;
-            localMemberView.setCameraDirectionFront(isFront);
+            if(localMemberView != null) {
+                localMemberView.setCameraDirectionFront(isFront);
+            }
         }
     }
 
@@ -1002,6 +1004,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 event.calleeDevId = EaseCallKit.deviceId;
                 sendCmdMsg(event, username);
             }
+            exitChannel();
         }
     };
 

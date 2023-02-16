@@ -267,6 +267,7 @@ public class EaseCallFloatWindow {
     private void stopCount() {
         if(chronometer != null) {
             chronometer.stop();
+            chronometer = null;
         }
     }
 
@@ -405,6 +406,8 @@ public class EaseCallFloatWindow {
         floatView = null;
         memberView = null;
         textureView = null;
+        avatarView = null;
+        tvTime = null;
         if(conferenceInfo != null) {
             conferenceInfo = null;
         }
@@ -413,6 +416,7 @@ public class EaseCallFloatWindow {
         }
         handler.removeCallbacksAndMessages(null);
         currentInstanceName=null;
+        rtcEngine = null;
     }
 
     public void resetCurrentInstance(){

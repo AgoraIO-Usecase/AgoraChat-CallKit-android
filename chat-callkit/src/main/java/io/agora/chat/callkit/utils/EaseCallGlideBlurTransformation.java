@@ -15,7 +15,7 @@ public class EaseCallGlideBlurTransformation extends CenterCrop {
     private Context context;
 
     public EaseCallGlideBlurTransformation(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
     }
 
     @Override

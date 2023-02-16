@@ -26,7 +26,7 @@ public class EaseCallAudioControl {
 
     public void init(Context context) {
         this.mContext = context.getApplicationContext();
-        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         Uri ringUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
         audioManager.setMode(AudioManager.MODE_RINGTONE);
         if (ringUri != null) {

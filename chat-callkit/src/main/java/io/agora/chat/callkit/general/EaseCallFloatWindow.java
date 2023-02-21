@@ -39,8 +39,8 @@ import io.agora.chat.callkit.utils.EaseCallKitUtils;
 import io.agora.chat.callkit.widget.EaseCallChronometer;
 import io.agora.chat.callkit.widget.EaseCallImageView;
 import io.agora.chat.callkit.widget.EaseCallMemberView;
-import io.agora.rtc.RtcEngine;
-import io.agora.rtc.video.VideoCanvas;
+import io.agora.rtc2.RtcEngine;
+import io.agora.rtc2.video.VideoCanvas;
 import io.agora.util.EMLog;
 
 

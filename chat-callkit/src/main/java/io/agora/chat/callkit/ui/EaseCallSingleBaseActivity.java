@@ -101,7 +101,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     };
     List<String> mPermissionList = new ArrayList<>();
 
-
     private View rootView;
     private boolean isMuteVoice = false;
     private boolean isSpeakerOn;
@@ -120,6 +119,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     private int idInOppositeSurfaceLayout = -1;
     protected EaseCallType callType;
     private TimeHandler timehandler;
+    private TimeUpdateHandler updateHandler;
     private InComingCallHandler inComingCallHandler;
     private DateFormat dateFormat = null;
     private RtcEngine mRtcEngine;
@@ -168,6 +168,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         }
                         //start invite time record
                         timehandler.startTime();
+                    }else {
+                        updateHandler.startTime();
                     }
                     if(inComingCallHandler != null) {
                         inComingCallHandler.stopTime();
@@ -299,6 +301,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         checkFloatIntent(getIntent());
         addLiveDataObserver();
         timehandler = new TimeHandler();
+        updateHandler = new TimeUpdateHandler();
         if(isInComingCall) {
             if(inComingCallHandler == null) {
                 inComingCallHandler = new InComingCallHandler();
@@ -520,7 +523,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             mBinding.llVideoCallingHead.setVisibility(View.VISIBLE);
             mBinding.llVoiceCallingHead.setVisibility(View.GONE);
             mBinding.tvCallState.setText(getApplicationContext().getString(R.string.ease_call_calling));
-            //oppositeSurface_layout.setVisibility(View.GONE);
         }
         mBinding.llComingCallVoice.setVisibility(View.GONE);
         mBinding.groupOngoingSettings.setVisibility(View.GONE);
@@ -622,6 +624,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 EaseCallAudioControl.getInstance().stopPlayRing();
                 sendAgreeMessage();
             }
+
         } else if (id == R.id.btn_hangup_call || id == R.id.btn_video_hangup_call) {
             stopCount();
             if (remoteUId == 0) {
@@ -986,6 +989,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         if (!isInComingCall) {
                             //Stop quorum timer
                             timehandler.stopTime();
+                            updateHandler.stopTime();
                         }
                         //cancel call
                         exitChannel();
@@ -1005,6 +1009,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_BUSY)) {
                             if (!mConfirmRing) {
                                 timehandler.stopTime();
+                                updateHandler.stopTime();
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -1019,10 +1024,12 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                                 });
                             } else {
                                 timehandler.stopTime();
+                                updateHandler.stopTime();
                                 sendCmdMsg(callEvent, username);
                             }
                         } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
                             //Set to answer
+                            updateHandler.startTime();
                             EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
                             timehandler.stopTime();
                             sendCmdMsg(callEvent, username);
@@ -1038,8 +1045,10 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
                                 });
                             }
+
                         } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
                             timehandler.stopTime();
+                            updateHandler.stopTime();
                             sendCmdMsg(callEvent, username);
                         }
                         break;
@@ -1063,6 +1072,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         String deviceId = confirmEvent.calleeDevId;
                         String result = confirmEvent.result;
                         timehandler.stopTime();
+                        updateHandler.stopTime();
                         //is self device
                         if (TextUtils.equals(deviceId, EaseCallKit.deviceId)) {
                             //The received arbitration is an answer
@@ -1365,6 +1375,42 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
     }
 
+    private class TimeUpdateHandler extends Handler{
+        private final int MSG_UPDATE_TIMER = 0;
+        private int timePassed = 0;
+        private String passedTime;
+
+        public TimeUpdateHandler(){
+
+        }
+
+        public void startTime() {
+            timePassed = 0;
+            sendEmptyMessageDelayed(MSG_UPDATE_TIMER, 1000);
+        }
+
+        public String getPassedTime() {
+            passedTime = dateFormat.format(timePassed * 1000);
+            return passedTime;
+        }
+
+        public void stopTime() {
+            removeMessages(MSG_UPDATE_TIMER);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_UPDATE_TIMER) {
+                timePassed++;
+                mBinding.tvCallStateVoice.setText(getPassedTime());
+                sendEmptyMessageDelayed(MSG_UPDATE_TIMER, 1000);
+                return;
+            }
+            super.handleMessage(msg);
+        }
+
+    }
+
     private class TimeHandler extends Handler {
         private final int MSG_TIMER = 0;
         private int timePassed = 0;
@@ -1392,7 +1438,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             if (msg.what == MSG_TIMER) {
                 timePassed++;
                 Log.e("TAG", "TimeHandler timePassed: " + timePassed);
-                String time = dateFormat.format(timePassed * 1000);
 
                 long intervalTime;
                 EaseCallKitConfig callKitConfig = EaseCallKit.getInstance().getCallKitConfig();
@@ -1539,6 +1584,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     private void insertCancelMessageToLocal() {
         final ChatMessage message = ChatMessage.createTxtSendMessage(getApplicationContext().getString(R.string.ease_call_invited_to_make_multi_party_call), username);
+        message.setStatus(ChatMessage.Status.SUCCESS);
         message.setAttribute(EaseCallMsgUtils.CALL_ACTION, EaseCallAction.CALL_CANCEL.state);
         message.setAttribute(EaseCallMsgUtils.CALL_CHANNELNAME, channelName);
         message.setAttribute(EaseCallMsgUtils.CALL_TYPE, callType.code);
@@ -1651,6 +1697,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
         if (timehandler != null) {
             timehandler.stopTime();
+        }
+        if (updateHandler != null){
+            updateHandler.stopTime();
         }
     }
 

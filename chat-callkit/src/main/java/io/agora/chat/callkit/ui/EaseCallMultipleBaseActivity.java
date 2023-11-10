@@ -115,7 +115,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     private volatile boolean mConfirRing = false;
     private EaseCallType callType;
     private boolean isMuteState = false;
-    private boolean isVideoMute = false;
+    private boolean isShowVideo = true;
     private boolean isCameraFront = true;
     private EaseCallMemberView localMemberView;
     private String agoraAppId = null;
@@ -302,11 +302,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                         RtcEngine.CreateRendererView(getApplicationContext());
                                 memberView.addSurfaceView(surfaceView);
                                 surfaceView.setZOrderOnTop(false);
-                                memberView.showVideo(false);
+                                memberView.showVideo(true);
                                 surfaceView.setZOrderMediaOverlay(false);
                                 mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, uid));
                             } else {
-                                memberView.showVideo(false);
+                                memberView.showVideo(true);
                             }
                         }
                     } else {
@@ -323,7 +323,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
                         mBinding.surfaceViewGroup.addView(memberView);
 
-                        memberView.showVideo(false);
+                        memberView.showVideo(true);
                         inChannelViews.put(uid, memberView);
                         mRtcEngine.setupRemoteVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
 
@@ -346,9 +346,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     EaseCallMemberView memberView = inChannelViews.get(uid);
                     if (memberView != null) {
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
-                            memberView.showVideo(true);
-                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             memberView.showVideo(false);
+                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                            memberView.showVideo(true);
                         }
 
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
@@ -688,9 +688,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         memberView.addSurfaceView(surfaceView);
         if (callType == EaseCallType.CONFERENCE_VOICE_CALL) {
             memberView.setVoiceOnlineImageState(false);
-            memberView.showVideo(true);
-        } else {
             memberView.showVideo(false);
+        } else {
+            memberView.showVideo(true);
             memberView.setVoiceOnlineImageState(true);
         }
         return memberView;
@@ -749,11 +749,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    private void changeVideoState(boolean videoOff) {
-        localMemberView.showVideo(videoOff);
-        mRtcEngine.muteLocalVideoStream(videoOff);
-        isVideoMute = videoOff;
-        mBinding.btnVidicon.setBackground(videoOff ? getResources().getDrawable(R.drawable.call_video_off) : getResources().getDrawable(R.drawable.call_video_on));
+    private void changeVideoState(boolean showVideo) {
+        localMemberView.showVideo(showVideo);
+        mRtcEngine.muteLocalVideoStream(!showVideo);
+        isShowVideo = showVideo;
+        mBinding.btnVidicon.setBackground(showVideo ?  getResources().getDrawable(R.drawable.call_video_on):getResources().getDrawable(R.drawable.call_video_off));
     }
 
     private void changeCameraDirect(boolean isFront) {
@@ -776,7 +776,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         } else if (viewId == R.id.btn_speaker_switch_voice) {
             changeSpeakerState(!mBinding.btnSpeakerSwitchVoice.isActivated());
         } else if (viewId == R.id.btn_vidicon) {
-            changeVideoState(!isVideoMute);
+            changeVideoState(!isShowVideo);
         } else if (viewId == R.id.btn_change_camera_switch) {
             changeCameraDirect(!isCameraFront);
         } else if (viewId == R.id.btn_hangup_voice || viewId == R.id.btn_hangup_video) {
@@ -1178,7 +1178,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         final EaseCallMemberView memberView = new EaseCallMemberView(getApplicationContext());
                         memberView.setUserInfo(new EaseUserAccount(0, username));
 //                        memberView.setLoading(true);
-                        memberView.showVideo(true);
+                        memberView.showVideo(false);
                         mBinding.surfaceViewGroup.addView(memberView);
                         placeholders.put(username, memberView);
                     }
@@ -1593,7 +1593,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 viewState.isAudioOff = value.getAudioOff();
                 viewState.isCameraFront = value.isCameraDirectionFront();
                 viewState.isFullScreenMode = value.isFullScreen();
-                viewState.isVideoOff = value.isShowVideo();
+                viewState.isShowVideo = value.isShowVideo();
                 viewState.speakActivated = value.isSpeakActivated();
             }
             viewStateMap.put(key, viewState);
@@ -1695,7 +1695,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             EaseCallMemberView memberView = createCallMemberView();
             memberView.setCameraDirectionFront(state.isCameraFront);
             memberView.setAudioOff(state.isAudioOff);
-            memberView.showVideo(state.isVideoOff);
+            memberView.showVideo(state.isShowVideo);
             memberView.setSpeakActivated(state.speakActivated);
             memberView.setFullScreen(state.isFullScreenMode);
             memberViewMap.put(uid, memberView);

@@ -202,6 +202,20 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
             ((ViewGroup)parent).removeView(child);
         }
         super.addView(child);
+        doAddView(child);
+    }
+
+    @Override
+    public void addView(View child, int index) {
+        ViewParent parent = child.getParent();
+        if(parent!=null) {
+            ((ViewGroup)parent).removeView(child);
+        }
+        super.addView(child, index);
+        doAddView(child);
+    }
+
+    private void doAddView(View child) {
         if (isFullScreenMode()) {
             EMLog.i(TAG, "addView, isFullScreenMode: " + isFullScreenMode());
             // The size setting and sliding of the child view are not performed in full screen mode
@@ -228,7 +242,7 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
             }
         } else {
             // Can only be clicked to enter full screen when video is turned on
-            if (v instanceof EaseCallMemberView && !((EaseCallMemberView) v).isShowVideo()) {
+            if (v instanceof EaseCallMemberView && ((EaseCallMemberView) v).isShowVideo()) {
                 fullScreen(v);
             }
         }

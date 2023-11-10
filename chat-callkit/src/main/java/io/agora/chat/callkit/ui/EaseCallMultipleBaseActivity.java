@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -50,7 +51,6 @@ import androidx.core.content.ContextCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,7 +107,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
     private static final String TAG = EaseCallMultipleBaseActivity.class.getSimpleName();
     private TimeHandler timeHandler;
-    private TimeHandler timeUpdataTimer;
     private RtcEngine mRtcEngine;
     // Determine whether to initiate or to be invited
     protected boolean isInComingCall;
@@ -161,7 +160,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
             EMLog.d(TAG, "onJoinChannelSuccess channel:" + channel + " uid" + uid);
             // Add channel start timer
-            timeUpdataTimer.startTime(CALL_TIMER_CALL_TIME);
             if (!isInComingCall) {
                 ArrayList<String> userList = EaseCallKit.getInstance().getInviteeUsers();
                 if (userList != null && userList.size() > 0) {
@@ -438,7 +436,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         for (AudioVolumeInfo info : speakers) {
                             Integer uId = info.uid;
                             int volume = info.volume;
-                            EMLog.d(TAG, "onAudioVolumeIndication:" +uId + ",volume: " + volume);
+//                            EMLog.d(TAG, "onAudioVolumeIndication:" +uId + ",volume: " + volume);
                             if (uidsNotSpeak.contains(uId)) {
                                 EaseCallMemberView memberView = inChannelViews.get(uId);
                                 if (memberView != null && !memberView.getAudioOff()) {
@@ -460,6 +458,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             });
         }
     };
+    private SimpleDateFormat dateFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -486,9 +485,10 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         initView();
         addLiveDataObserver();
         timeHandler = new TimeHandler();
-        timeUpdataTimer = new TimeHandler();
         checkConference(true);
         EaseCallKit.getInstance().getNotifier().reset();
+        dateFormat = new SimpleDateFormat("HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private void initPermission() {
@@ -781,7 +781,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             changeCameraDirect(!isCameraFront);
         } else if (viewId == R.id.btn_hangup_voice || viewId == R.id.btn_hangup_video) {
             if (listener != null) {
-                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, timeUpdataTimer.timePassed * 1000);
+                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, mBinding.chronometer.getCostSeconds());
             }
             exitChannel();
         } else if (viewId == R.id.btn_float) {
@@ -869,7 +869,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                             mBinding.surfaceViewGroup.removeView(placeView);
                                         }
                                         if (listener != null) {
-                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, timeUpdataTimer.timePassed * 1000);
+                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, mBinding.chronometer.getCostSeconds());
                                         }
                                         // check placeholders state
                                         if (placeholders.size() == 0) {
@@ -1039,32 +1039,15 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    //update time
-    private void updateConferenceTime(String time) {
-        Log.e(TAG, "time: " + time);
-        mBinding.tvCallTime.setText(time);
-    }
-
     private class TimeHandler extends Handler {
-        private DateFormat dateFormat = null;
         private int timePassed = 0;
         private String passedTime;
-
-        public TimeHandler() {
-            dateFormat = new SimpleDateFormat("mm:ss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        }
 
         public void startTime(int timeType) {
             Log.e(TAG, "start timer");
             timePassed = 0;
             removeMessages(timeType);
             sendEmptyMessageDelayed(timeType, 1000);
-        }
-
-        public String getPassedTime() {
-            passedTime = dateFormat.format(timePassed * 1000);
-            return passedTime;
         }
 
         public void stopTime() {
@@ -1131,8 +1114,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     }
 
     private void updateTime(TimeHandler handler) {
-        String time = handler.dateFormat.format(handler.timePassed * 1000);
-        updateConferenceTime(time);
         handler.removeMessages(CALL_TIMER_CALL_TIME);
         handler.sendEmptyMessageDelayed(CALL_TIMER_CALL_TIME, 1000);
     }
@@ -1554,7 +1535,8 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         message.setAttribute(EaseCallMsgUtils.CALL_TYPE, callType.code);
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);
         message.setAttribute(EaseCallMsgUtils.CALL_CHANNELNAME, channelName);
-        message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, timeUpdataTimer.getPassedTime());
+        message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, mBinding.chronometer.getCostSeconds());
+        message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, dateFormat.format(mBinding.chronometer.getCostSeconds() * 1000));
         Conversation conversation = ChatClient.getInstance().chatManager().getConversation(groupId);
         if (conversation != null) {
             conversation.insertMessage(message);
@@ -1567,9 +1549,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     @Override
     public void doShowFloatWindow() {
         super.doShowFloatWindow();
-        if (timeUpdataTimer != null) {
-            Log.e(TAG, "timeUpdataTimer cost seconds: " + timeUpdataTimer.timePassed);
-            EaseCallFloatWindow.getInstance().setCostSeconds(timeUpdataTimer.timePassed);
+        if(mBinding.chronometer!=null) {
+            Log.e(TAG, "mBinding.chronometer.getCostSeconds(): " + mBinding.chronometer.getCostSeconds());
+            EaseCallFloatWindow.getInstance().setCostSeconds(mBinding.chronometer.getCostSeconds());
         }
         EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
         EaseCallFloatWindow.getInstance().show();
@@ -1660,9 +1642,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             // Prevent the activity from being started in the background to the foreground, causing the Window to still exist
             long costSeconds = EaseCallFloatWindow.getInstance().getTotalCostSeconds();
             Log.e(TAG, "costSeconds: " + costSeconds);
-            if (timeUpdataTimer != null) {
-                timeUpdataTimer.timePassed = (int) costSeconds;
-                updateTime(timeUpdataTimer);
+            if(mBinding.chronometer!=null) {
+                mBinding.chronometer.setBase(SystemClock.elapsedRealtime() - costSeconds * 1000);
+                mBinding.chronometer.start();
             }
             EaseCallFloatWindow.getInstance().dismiss();
         }
@@ -1744,9 +1726,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
         if (timeHandler != null) {
             timeHandler.stopTime();
-        }
-        if (timeUpdataTimer != null) {
-            timeUpdataTimer.stopTime();
         }
     }
 

@@ -781,7 +781,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             changeCameraDirect(!isCameraFront);
         } else if (viewId == R.id.btn_hangup_voice || viewId == R.id.btn_hangup_video) {
             if (listener != null) {
-                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, mBinding.chronometer.getCostSeconds());
+                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, mBinding.chronometer.getCostSeconds()*1000);
             }
             exitChannel();
         } else if (viewId == R.id.btn_float) {
@@ -869,7 +869,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                             mBinding.surfaceViewGroup.removeView(placeView);
                                         }
                                         if (listener != null) {
-                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, mBinding.chronometer.getCostSeconds());
+                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, mBinding.chronometer.getCostSeconds()*1000);
                                         }
                                         // check placeholders state
                                         if (placeholders.size() == 0) {
@@ -1535,7 +1535,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         message.setAttribute(EaseCallMsgUtils.CALL_TYPE, callType.code);
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);
         message.setAttribute(EaseCallMsgUtils.CALL_CHANNELNAME, channelName);
-        message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, mBinding.chronometer.getCostSeconds());
         message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, dateFormat.format(mBinding.chronometer.getCostSeconds() * 1000));
         Conversation conversation = ChatClient.getInstance().chatManager().getConversation(groupId);
         if (conversation != null) {

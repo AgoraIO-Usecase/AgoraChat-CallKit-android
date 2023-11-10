@@ -199,6 +199,7 @@ public class EaseCallMemberView extends RelativeLayout {
             surfaceViewLayout.setVisibility(GONE);
             ivVidicon.setVisibility(VISIBLE);
         }
+        //never show under this
         if(callType==EaseCallType.CONFERENCE_VOICE_CALL||callType==EaseCallType.SINGLE_VOICE_CALL) {
             ivVidicon.setVisibility(GONE);
         }

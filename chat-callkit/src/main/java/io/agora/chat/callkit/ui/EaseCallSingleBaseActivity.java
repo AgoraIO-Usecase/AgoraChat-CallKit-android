@@ -1606,6 +1606,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl, 0, remoteUId, surface);
         EaseCallFloatWindow.getInstance().setCameraDirection(isCameraFront, changeFlag);
         moveTaskToBack(false);
+        //Solve problems that require two clicks
+        EaseCallFloatWindow.getInstance().getFloatView().requestFocus();
     }
 
     @Override

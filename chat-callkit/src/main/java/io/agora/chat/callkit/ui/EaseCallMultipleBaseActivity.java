@@ -19,7 +19,6 @@ import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STOPPED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
-import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STARTING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
 
 import android.Manifest;
@@ -1585,6 +1584,8 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             EaseCallFloatWindow.getInstance().update(memberView);
         }
         moveTaskToBack(false);
+        //Solve problems that require two clicks
+        EaseCallFloatWindow.getInstance().getFloatView().requestFocus();
     }
 
     private void setConferenceInfoAfterShowFloat() {

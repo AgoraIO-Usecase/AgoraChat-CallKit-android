@@ -271,6 +271,10 @@ public class EaseCallFloatWindow {
         }
     }
 
+    public View getFloatView(){
+        return floatView;
+    }
+
     /**
      * Should call the method before call {@link #dismiss()}
      * @return Cost seconds in float window

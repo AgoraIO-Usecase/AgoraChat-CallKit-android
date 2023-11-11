@@ -249,9 +249,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         //Stop the video remotely
                         //Opens by onFirstRemoteVideoDecoded callback to update the view, avoid rebuild streaming video produced by the black screen time
                         //They'll probably have their cameras turned off by the time they join
-                        if(muted) {
-                            updateViewWithCameraStatus();
-                        }
+                        updateViewWithCameraStatus();
                     }
                 }
             });
@@ -867,12 +865,11 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         if (changeFlag) {
             updateLocalSurfaceLayoutUid(remoteUId);
             updateOppositeSurfaceLayoutUid(0);
-            changeFlag = !changeFlag;
         } else {
             updateLocalSurfaceLayoutUid(0);
             updateOppositeSurfaceLayoutUid(remoteUId);
-            changeFlag = !changeFlag;
         }
+        changeFlag = !changeFlag;
     }
 
     private synchronized void updateOppositeSurfaceLayoutUid(int uid) {

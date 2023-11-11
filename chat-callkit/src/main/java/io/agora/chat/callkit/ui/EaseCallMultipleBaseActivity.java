@@ -592,9 +592,19 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         event.calleeDevId = EaseCallKit.deviceId;
         sendCmdMsg(event, username);
     }
+    //Fix the back button to form a suspended window, and then return to the desktop.
+    // Some models will cause activity recycling, and clicking the suspended window will rebuild the activity, resulting in abnormal status
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean("isComingCall", isInComingCall);
+        outState.putString("username", username);
+        outState.putString("channelName", channelName);
+        outState.putBoolean("isAgreedInHeadDialog", isAgreedInHeadDialog);
+        super.onSaveInstanceState(outState);
+    }
 
     private void initParams(Bundle bundle) {
-        if (bundle != null) {
+        if (!isFloatWindowShowing()&&bundle != null) {
             isInComingCall = bundle.getBoolean("isComingCall", false);
             username = bundle.getString("username");
             channelName = bundle.getString("channelName");
@@ -603,6 +613,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             isInComingCall = EaseCallKit.getInstance().getIsComingCall();
             username = EaseCallKit.getInstance().getFromUserId();
             channelName = EaseCallKit.getInstance().getChannelName();
+            isAgreedInHeadDialog = EaseCallKit.getInstance().isAgreedInHeadDialog();
         }
         callType = EaseCallKit.getInstance().getCallType();
         try {
@@ -1425,34 +1436,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    private void resetVideoView() {
-        if (inChannelViews != null && !inChannelViews.isEmpty()) {
-            Iterator<Map.Entry<Integer, EaseCallMemberView>> iterator = inChannelViews.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<Integer, EaseCallMemberView> entry = iterator.next();
-                Integer uid = entry.getKey();
-                EaseCallMemberView memberView = entry.getValue();
-                if (inChannelAccounts.containsKey(uid)) {
-                    memberView.setUserInfo(inChannelAccounts.get(uid));
-                }
-                if (uid != 0) {
-                    mBinding.surfaceViewGroup.addView(memberView);
-                    mRtcEngine.setupRemoteVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
-                } else {
-                    localMemberView = memberView;
-                    mBinding.surfaceViewGroup.addView(memberView, 0);
-                    mRtcEngine.setupLocalVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
-                }
-            }
-        }
-        if (localMemberView != null) {
-            changeCameraDirect(localMemberView.isCameraDirectionFront());
-            changeVideoState(localMemberView.isShowVideo());
-            changeSpeakerState(localMemberView.isSpeakActivated());
-            changeMuteState(localMemberView.isAudioOff());
-        }
-    }
-
     private void updateUserInfo(int uid) {
         //update userinfo in local view
         runOnUiThread(new Runnable() {
@@ -1678,6 +1661,37 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 this.inChannelViews.putAll(callViewMap);
                 info.uidToViewList.clear();
             }
+        }
+    }
+    private void resetVideoView() {
+        if (inChannelViews != null && !inChannelViews.isEmpty()) {
+            Iterator<Map.Entry<Integer, EaseCallMemberView>> iterator = inChannelViews.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, EaseCallMemberView> entry = iterator.next();
+                Integer uid = entry.getKey();
+                EaseCallMemberView memberView = entry.getValue();
+                if (inChannelAccounts.containsKey(uid)) {
+                    memberView.setUserInfo(inChannelAccounts.get(uid));
+                }
+                if(uid==0) {
+                    EaseUserAccount account = new EaseUserAccount(0, ChatClient.getInstance().getCurrentUser());
+                    memberView.setUserInfo(account);
+                }
+                if (uid != 0) {
+                    mBinding.surfaceViewGroup.addView(memberView);
+                    mRtcEngine.setupRemoteVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
+                } else {
+                    localMemberView = memberView;
+                    mBinding.surfaceViewGroup.addView(memberView, 0);
+                    mRtcEngine.setupLocalVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
+                }
+            }
+        }
+        if (localMemberView != null) {
+            changeCameraDirect(localMemberView.isCameraDirectionFront());
+            changeVideoState(localMemberView.isShowVideo());
+            changeSpeakerState(localMemberView.isSpeakActivated());
+            changeMuteState(localMemberView.isAudioOff());
         }
     }
 

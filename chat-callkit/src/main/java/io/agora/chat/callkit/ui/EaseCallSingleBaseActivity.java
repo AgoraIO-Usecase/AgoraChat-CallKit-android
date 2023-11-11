@@ -328,9 +328,19 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             }
         }
     }
+    //Fix the back button to form a suspended window, and then return to the desktop. Some models will cause activity recycling,
+    // and clicking the suspended window will rebuild the activity, resulting in abnormal status
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean("isComingCall", isInComingCall);
+        outState.putString("username", username);
+        outState.putString("channelName", channelName);
+        outState.putBoolean("isAgreedInHeadDialog", isAgreedInHeadDialog);
+        super.onSaveInstanceState(outState);
+    }
 
     private void initParams(Bundle bundle) {
-        if (bundle != null) {
+        if (!isFloatWindowShowing()&&bundle != null) {
             isInComingCall = bundle.getBoolean("isComingCall", false);
             username = bundle.getString("username");
             channelName = bundle.getString("channelName");
@@ -346,6 +356,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             isInComingCall = EaseCallKit.getInstance().getIsComingCall();
             username = EaseCallKit.getInstance().getFromUserId();
             channelName = EaseCallKit.getInstance().getChannelName();
+            isAgreedInHeadDialog = EaseCallKit.getInstance().isAgreedInHeadDialog();
             EaseCallFloatWindow.getInstance(getApplicationContext()).setCallType(callType);
         }
     }

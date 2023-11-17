@@ -39,7 +39,7 @@ public class EaseCallMemberView extends RelativeLayout {
 
     private EaseUserAccount userInfo;
 
-    private boolean isShowVideo = true;
+    private boolean isShowVideo = false;
     private boolean isAudioOff = false;
     private boolean isDesktop = false;
     private boolean isFullScreenMode = false;
@@ -190,7 +190,7 @@ public class EaseCallMemberView extends RelativeLayout {
      */
     public void showVideo(boolean show) {
         isShowVideo = show;
-        if (!isShowVideo) {
+        if (isShowVideo) {
             avatarView.setVisibility(View.GONE);
             surfaceViewLayout.setVisibility(VISIBLE);
             ivVidicon.setVisibility(GONE);
@@ -198,6 +198,10 @@ public class EaseCallMemberView extends RelativeLayout {
             avatarView.setVisibility(View.VISIBLE);
             surfaceViewLayout.setVisibility(GONE);
             ivVidicon.setVisibility(VISIBLE);
+        }
+        //never show under this
+        if(callType==EaseCallType.CONFERENCE_VOICE_CALL||callType==EaseCallType.SINGLE_VOICE_CALL) {
+            ivVidicon.setVisibility(GONE);
         }
     }
 

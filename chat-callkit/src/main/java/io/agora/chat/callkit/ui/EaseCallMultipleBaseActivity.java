@@ -19,7 +19,6 @@ import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STOPPED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
-import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STARTING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
 
 import android.Manifest;
@@ -30,6 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -51,7 +51,6 @@ import androidx.core.content.ContextCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,7 +107,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
     private static final String TAG = EaseCallMultipleBaseActivity.class.getSimpleName();
     private TimeHandler timeHandler;
-    private TimeHandler timeUpdataTimer;
     private RtcEngine mRtcEngine;
     // Determine whether to initiate or to be invited
     protected boolean isInComingCall;
@@ -117,7 +115,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     private volatile boolean mConfirRing = false;
     private EaseCallType callType;
     private boolean isMuteState = false;
-    private boolean isVideoMute = false;
+    private boolean isShowVideo = true;
     private boolean isCameraFront = true;
     private EaseCallMemberView localMemberView;
     private String agoraAppId = null;
@@ -162,7 +160,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
             EMLog.d(TAG, "onJoinChannelSuccess channel:" + channel + " uid" + uid);
             // Add channel start timer
-            timeUpdataTimer.startTime(CALL_TIMER_CALL_TIME);
             if (!isInComingCall) {
                 ArrayList<String> userList = EaseCallKit.getInstance().getInviteeUsers();
                 if (userList != null && userList.size() > 0) {
@@ -305,11 +302,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                         RtcEngine.CreateRendererView(getApplicationContext());
                                 memberView.addSurfaceView(surfaceView);
                                 surfaceView.setZOrderOnTop(false);
-                                memberView.showVideo(false);
+                                memberView.showVideo(true);
                                 surfaceView.setZOrderMediaOverlay(false);
                                 mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, uid));
                             } else {
-                                memberView.showVideo(false);
+                                memberView.showVideo(true);
                             }
                         }
                     } else {
@@ -326,7 +323,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
                         mBinding.surfaceViewGroup.addView(memberView);
 
-                        memberView.showVideo(false);
+                        memberView.showVideo(true);
                         inChannelViews.put(uid, memberView);
                         mRtcEngine.setupRemoteVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
 
@@ -349,9 +346,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     EaseCallMemberView memberView = inChannelViews.get(uid);
                     if (memberView != null) {
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
-                            memberView.showVideo(true);
-                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             memberView.showVideo(false);
+                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                            memberView.showVideo(true);
                         }
 
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
@@ -439,7 +436,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         for (AudioVolumeInfo info : speakers) {
                             Integer uId = info.uid;
                             int volume = info.volume;
-                            EMLog.d(TAG, "onAudioVolumeIndication:" +uId + ",volume: " + volume);
+//                            EMLog.d(TAG, "onAudioVolumeIndication:" +uId + ",volume: " + volume);
                             if (uidsNotSpeak.contains(uId)) {
                                 EaseCallMemberView memberView = inChannelViews.get(uId);
                                 if (memberView != null && !memberView.getAudioOff()) {
@@ -461,6 +458,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             });
         }
     };
+    private SimpleDateFormat dateFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -487,9 +485,10 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         initView();
         addLiveDataObserver();
         timeHandler = new TimeHandler();
-        timeUpdataTimer = new TimeHandler();
         checkConference(true);
         EaseCallKit.getInstance().getNotifier().reset();
+        dateFormat = new SimpleDateFormat("HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private void initPermission() {
@@ -593,9 +592,19 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         event.calleeDevId = EaseCallKit.deviceId;
         sendCmdMsg(event, username);
     }
+    //Fix the back button to form a suspended window, and then return to the desktop.
+    // Some models will cause activity recycling, and clicking the suspended window will rebuild the activity, resulting in abnormal status
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean("isComingCall", isInComingCall);
+        outState.putString("username", username);
+        outState.putString("channelName", channelName);
+        outState.putBoolean("isAgreedInHeadDialog", isAgreedInHeadDialog);
+        super.onSaveInstanceState(outState);
+    }
 
     private void initParams(Bundle bundle) {
-        if (bundle != null) {
+        if (!isFloatWindowShowing()&&bundle != null) {
             isInComingCall = bundle.getBoolean("isComingCall", false);
             username = bundle.getString("username");
             channelName = bundle.getString("channelName");
@@ -604,6 +613,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             isInComingCall = EaseCallKit.getInstance().getIsComingCall();
             username = EaseCallKit.getInstance().getFromUserId();
             channelName = EaseCallKit.getInstance().getChannelName();
+            isAgreedInHeadDialog = EaseCallKit.getInstance().isAgreedInHeadDialog();
         }
         callType = EaseCallKit.getInstance().getCallType();
         try {
@@ -689,9 +699,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         memberView.addSurfaceView(surfaceView);
         if (callType == EaseCallType.CONFERENCE_VOICE_CALL) {
             memberView.setVoiceOnlineImageState(false);
-            memberView.showVideo(true);
-        } else {
             memberView.showVideo(false);
+        } else {
+            memberView.showVideo(true);
             memberView.setVoiceOnlineImageState(true);
         }
         return memberView;
@@ -750,11 +760,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    private void changeVideoState(boolean videoOff) {
-        localMemberView.showVideo(videoOff);
-        mRtcEngine.muteLocalVideoStream(videoOff);
-        isVideoMute = videoOff;
-        mBinding.btnVidicon.setBackground(videoOff ? getResources().getDrawable(R.drawable.call_video_off) : getResources().getDrawable(R.drawable.call_video_on));
+    private void changeVideoState(boolean showVideo) {
+        localMemberView.showVideo(showVideo);
+        mRtcEngine.muteLocalVideoStream(!showVideo);
+        isShowVideo = showVideo;
+        mBinding.btnVidicon.setBackground(showVideo ?  getResources().getDrawable(R.drawable.call_video_on):getResources().getDrawable(R.drawable.call_video_off));
     }
 
     private void changeCameraDirect(boolean isFront) {
@@ -777,12 +787,12 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         } else if (viewId == R.id.btn_speaker_switch_voice) {
             changeSpeakerState(!mBinding.btnSpeakerSwitchVoice.isActivated());
         } else if (viewId == R.id.btn_vidicon) {
-            changeVideoState(!isVideoMute);
+            changeVideoState(!isShowVideo);
         } else if (viewId == R.id.btn_change_camera_switch) {
             changeCameraDirect(!isCameraFront);
         } else if (viewId == R.id.btn_hangup_voice || viewId == R.id.btn_hangup_video) {
             if (listener != null) {
-                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, timeUpdataTimer.timePassed * 1000);
+                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonHangup, mBinding.chronometer.getCostSeconds()*1000);
             }
             exitChannel();
         } else if (viewId == R.id.btn_float) {
@@ -870,7 +880,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                                             mBinding.surfaceViewGroup.removeView(placeView);
                                         }
                                         if (listener != null) {
-                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, timeUpdataTimer.timePassed * 1000);
+                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, mBinding.chronometer.getCostSeconds()*1000);
                                         }
                                         // check placeholders state
                                         if (placeholders.size() == 0) {
@@ -1040,32 +1050,15 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    //update time
-    private void updateConferenceTime(String time) {
-        Log.e(TAG, "time: " + time);
-        mBinding.tvCallTime.setText(time);
-    }
-
     private class TimeHandler extends Handler {
-        private DateFormat dateFormat = null;
         private int timePassed = 0;
         private String passedTime;
-
-        public TimeHandler() {
-            dateFormat = new SimpleDateFormat("mm:ss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        }
 
         public void startTime(int timeType) {
             Log.e(TAG, "start timer");
             timePassed = 0;
             removeMessages(timeType);
             sendEmptyMessageDelayed(timeType, 1000);
-        }
-
-        public String getPassedTime() {
-            passedTime = dateFormat.format(timePassed * 1000);
-            return passedTime;
         }
 
         public void stopTime() {
@@ -1132,8 +1125,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     }
 
     private void updateTime(TimeHandler handler) {
-        String time = handler.dateFormat.format(handler.timePassed * 1000);
-        updateConferenceTime(time);
         handler.removeMessages(CALL_TIMER_CALL_TIME);
         handler.sendEmptyMessageDelayed(CALL_TIMER_CALL_TIME, 1000);
     }
@@ -1198,7 +1189,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                         final EaseCallMemberView memberView = new EaseCallMemberView(getApplicationContext());
                         memberView.setUserInfo(new EaseUserAccount(0, username));
 //                        memberView.setLoading(true);
-                        memberView.showVideo(true);
+                        memberView.showVideo(false);
                         mBinding.surfaceViewGroup.addView(memberView);
                         placeholders.put(username, memberView);
                     }
@@ -1445,34 +1436,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-    private void resetVideoView() {
-        if (inChannelViews != null && !inChannelViews.isEmpty()) {
-            Iterator<Map.Entry<Integer, EaseCallMemberView>> iterator = inChannelViews.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<Integer, EaseCallMemberView> entry = iterator.next();
-                Integer uid = entry.getKey();
-                EaseCallMemberView memberView = entry.getValue();
-                if (inChannelAccounts.containsKey(uid)) {
-                    memberView.setUserInfo(inChannelAccounts.get(uid));
-                }
-                if (uid != 0) {
-                    mBinding.surfaceViewGroup.addView(memberView);
-                    mRtcEngine.setupRemoteVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
-                } else {
-                    localMemberView = memberView;
-                    mBinding.surfaceViewGroup.addView(memberView, 0);
-                    mRtcEngine.setupLocalVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
-                }
-            }
-        }
-        if (localMemberView != null) {
-            changeCameraDirect(localMemberView.isCameraDirectionFront());
-            changeVideoState(localMemberView.isShowVideo());
-            changeSpeakerState(localMemberView.isSpeakActivated());
-            changeMuteState(localMemberView.isAudioOff());
-        }
-    }
-
     private void updateUserInfo(int uid) {
         //update userinfo in local view
         runOnUiThread(new Runnable() {
@@ -1555,7 +1518,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         message.setAttribute(EaseCallMsgUtils.CALL_TYPE, callType.code);
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);
         message.setAttribute(EaseCallMsgUtils.CALL_CHANNELNAME, channelName);
-        message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, timeUpdataTimer.getPassedTime());
+        message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, dateFormat.format(mBinding.chronometer.getCostSeconds() * 1000));
         Conversation conversation = ChatClient.getInstance().chatManager().getConversation(groupId);
         if (conversation != null) {
             conversation.insertMessage(message);
@@ -1568,9 +1531,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     @Override
     public void doShowFloatWindow() {
         super.doShowFloatWindow();
-        if (timeUpdataTimer != null) {
-            Log.e(TAG, "timeUpdataTimer cost seconds: " + timeUpdataTimer.timePassed);
-            EaseCallFloatWindow.getInstance().setCostSeconds(timeUpdataTimer.timePassed);
+        if(mBinding.chronometer!=null) {
+            Log.e(TAG, "mBinding.chronometer.getCostSeconds(): " + mBinding.chronometer.getCostSeconds());
+            EaseCallFloatWindow.getInstance().setCostSeconds(mBinding.chronometer.getCostSeconds());
         }
         EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
         EaseCallFloatWindow.getInstance().show();
@@ -1585,6 +1548,8 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             EaseCallFloatWindow.getInstance().update(memberView);
         }
         moveTaskToBack(false);
+        //Solve problems that require two clicks
+        EaseCallFloatWindow.getInstance().getFloatView().requestFocus();
     }
 
     private void setConferenceInfoAfterShowFloat() {
@@ -1610,7 +1575,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 viewState.isAudioOff = value.getAudioOff();
                 viewState.isCameraFront = value.isCameraDirectionFront();
                 viewState.isFullScreenMode = value.isFullScreen();
-                viewState.isVideoOff = value.isShowVideo();
+                viewState.isShowVideo = value.isShowVideo();
                 viewState.speakActivated = value.isSpeakActivated();
             }
             viewStateMap.put(key, viewState);
@@ -1659,9 +1624,9 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             // Prevent the activity from being started in the background to the foreground, causing the Window to still exist
             long costSeconds = EaseCallFloatWindow.getInstance().getTotalCostSeconds();
             Log.e(TAG, "costSeconds: " + costSeconds);
-            if (timeUpdataTimer != null) {
-                timeUpdataTimer.timePassed = (int) costSeconds;
-                updateTime(timeUpdataTimer);
+            if(mBinding.chronometer!=null) {
+                mBinding.chronometer.setBase(SystemClock.elapsedRealtime() - costSeconds * 1000);
+                mBinding.chronometer.start();
             }
             EaseCallFloatWindow.getInstance().dismiss();
         }
@@ -1698,6 +1663,37 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             }
         }
     }
+    private void resetVideoView() {
+        if (inChannelViews != null && !inChannelViews.isEmpty()) {
+            Iterator<Map.Entry<Integer, EaseCallMemberView>> iterator = inChannelViews.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, EaseCallMemberView> entry = iterator.next();
+                Integer uid = entry.getKey();
+                EaseCallMemberView memberView = entry.getValue();
+                if (inChannelAccounts.containsKey(uid)) {
+                    memberView.setUserInfo(inChannelAccounts.get(uid));
+                }
+                if(uid==0) {
+                    EaseUserAccount account = new EaseUserAccount(0, ChatClient.getInstance().getCurrentUser());
+                    memberView.setUserInfo(account);
+                }
+                if (uid != 0) {
+                    mBinding.surfaceViewGroup.addView(memberView);
+                    mRtcEngine.setupRemoteVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
+                } else {
+                    localMemberView = memberView;
+                    mBinding.surfaceViewGroup.addView(memberView, 0);
+                    mRtcEngine.setupLocalVideo(new VideoCanvas(memberView.getSurfaceView(), VideoCanvas.RENDER_MODE_HIDDEN, uid));
+                }
+            }
+        }
+        if (localMemberView != null) {
+            changeCameraDirect(localMemberView.isCameraDirectionFront());
+            changeVideoState(localMemberView.isShowVideo());
+            changeSpeakerState(localMemberView.isSpeakActivated());
+            changeMuteState(localMemberView.isAudioOff());
+        }
+    }
 
     private Map<Integer, EaseCallMemberView> createCallViewMap(Map<Integer, EaseCallFloatWindow.ConferenceInfo.ViewState> viewStateMap) {
         Map<Integer, EaseCallMemberView> memberViewMap = new HashMap<>();
@@ -1712,7 +1708,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             EaseCallMemberView memberView = createCallMemberView();
             memberView.setCameraDirectionFront(state.isCameraFront);
             memberView.setAudioOff(state.isAudioOff);
-            memberView.showVideo(state.isVideoOff);
+            memberView.showVideo(state.isShowVideo);
             memberView.setSpeakActivated(state.speakActivated);
             memberView.setFullScreen(state.isFullScreenMode);
             memberViewMap.put(uid, memberView);
@@ -1743,9 +1739,6 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
         if (timeHandler != null) {
             timeHandler.stopTime();
-        }
-        if (timeUpdataTimer != null) {
-            timeUpdataTimer.stopTime();
         }
     }
 

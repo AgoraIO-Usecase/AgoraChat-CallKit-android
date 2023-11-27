@@ -447,8 +447,6 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             }
             inComingCallHandler.startTime();
         }
-        dateFormat = new SimpleDateFormat("HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         EaseCallKit.getInstance().getNotifier().reset();
     }
@@ -484,6 +482,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     private void initParams(Bundle bundle) {
         callType = EaseCallKit.getInstance().getCallType();
+        dateFormat = new SimpleDateFormat("HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         if (!isFloatWindowShowing() && bundle != null) {
             isInComingCall = bundle.getBoolean("isComingCall", false);
             username = bundle.getString("username");
@@ -1687,9 +1687,11 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        releaseHandler();
-        if (inChannelAccounts != null) {
-            inChannelAccounts.clear();
+        if(!isFloatWindowShowing()) {
+            releaseHandler();
+            if (inChannelAccounts != null) {
+                inChannelAccounts.clear();
+            }
         }
         if(callEventObserver!=null) {
             EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString(), EaseCallBaseEvent.class).removeObserver(callEventObserver);

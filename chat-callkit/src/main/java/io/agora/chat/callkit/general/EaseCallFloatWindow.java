@@ -295,9 +295,6 @@ public class EaseCallFloatWindow {
      */
     public long getTotalCostSeconds() {
         if(chronometer != null) {
-            Log.e("activity", "costSeconds: "+chronometer.getCostSeconds());
-        }
-        if(chronometer != null) {
             return costSeconds + chronometer.getCostSeconds();
         }
         Log.e(TAG, "chronometer is null, can not get total cost seconds");

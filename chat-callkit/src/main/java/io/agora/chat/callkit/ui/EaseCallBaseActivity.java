@@ -3,20 +3,24 @@ package io.agora.chat.callkit.ui;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.agora.chat.callkit.EaseCallKit;
 import io.agora.chat.callkit.general.EaseCallFloatWindow;
 import io.agora.chat.callkit.general.EaseCallState;
+import io.agora.util.EMLog;
 
 
 public class EaseCallBaseActivity extends AppCompatActivity {
     protected final int REQUEST_CODE_OVERLAY_PERMISSION = 1002;
     // To prevent opening the request hover page multiple times
     protected boolean requestOverlayPermission;
+    private final String TAG =getClass().getSimpleName();
 
     /**
      * Check whether float window is showing
@@ -55,11 +59,24 @@ public class EaseCallBaseActivity extends AppCompatActivity {
     public void doShowFloatWindow() {}
 
     @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        EMLog.d(TAG,"-------onCreate()");
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     protected void onStop() {
+        EMLog.d(TAG,"-------onStop()");
         super.onStop();
         if (EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_IDLE
                 && TextUtils.equals(EaseCallFloatWindow.getInstance().getCurrentInstance(),this.toString())) {
             showFloatWindow();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        EMLog.d(TAG,"-------onDestroy()");
+        super.onDestroy();
     }
 }

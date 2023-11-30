@@ -1519,6 +1519,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         message.setAttribute(EaseCallMsgUtils.CALL_MSG_TYPE, EaseCallMsgUtils.CALL_MSG_INFO);
         message.setAttribute(EaseCallMsgUtils.CALL_CHANNELNAME, channelName);
         message.setAttribute(EaseCallMsgUtils.CALL_COST_TIME, dateFormat.format(mBinding.chronometer.getCostSeconds() * 1000));
+        message.setStatus(ChatMessage.Status.SUCCESS);
         Conversation conversation = ChatClient.getInstance().chatManager().getConversation(groupId);
         if (conversation != null) {
             conversation.insertMessage(message);

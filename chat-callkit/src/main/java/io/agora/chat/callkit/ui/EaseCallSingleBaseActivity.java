@@ -251,7 +251,9 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         //Stop the video remotely
                         //Opens by onFirstRemoteVideoDecoded callback to update the view, avoid rebuild streaming video produced by the black screen time
                         //They'll probably have their cameras turned off by the time they join
-                        updateViewWithCameraStatus();
+                        if(muted) {
+                            updateViewWithCameraStatus();
+                        }
                     }
                 }
             });
@@ -1607,13 +1609,13 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             long totalCostSeconds = EaseCallFloatWindow.getInstance().getTotalCostSeconds();
             mBinding.chronometer.setBase(SystemClock.elapsedRealtime() - totalCostSeconds * 1000);
             mBinding.chronometer.start();
+            EaseCallFloatWindow.getInstance().dismiss();
         } else {
             if (!isNew) {
                 savedInstanceState = intent.getExtras();
                 init();
             }
         }
-        EaseCallFloatWindow.getInstance().dismiss();
     }
 
     /**
@@ -1627,8 +1629,8 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         }
         EaseCallFloatWindow.getInstance().setRtcEngine(getApplicationContext(), mRtcEngine);
         EaseCallFloatWindow.getInstance().show();
-        boolean surface = true;
-        if (isInComingCall && EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_ANSWERED) {
+        boolean surface = true;//Used to display images before switching on
+        if ( EaseCallKit.getInstance().getCallState() != EaseCallState.CALL_ANSWERED) {
             surface = false;
         }
         EaseCallFloatWindow.getInstance().update(!changeFlag, headUrl, 0, remoteUId, surface);

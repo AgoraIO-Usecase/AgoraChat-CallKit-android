@@ -608,7 +608,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         mBinding.groupUseInfo.setVisibility(View.VISIBLE);
         if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
             mBinding.llVideoCalledControl.setVisibility(View.VISIBLE);
-            mBinding.groupOngoingSettings.setVisibility(View.GONE);
+            mBinding.chronometer.setVisibility(View.GONE);
             mBinding.localSurfaceLayout.setVisibility(View.GONE);
             mBinding.tvCallState.setText(getString(R.string.ease_call_video_call));
         } else {
@@ -633,7 +633,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         callType = EaseCallKit.getInstance().getCallType();
         EaseCallFloatWindow.getInstance().setCallType(callType);
         if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
-            mBinding.groupOngoingSettings.setVisibility(View.GONE);
+            mBinding.chronometer.setVisibility(View.VISIBLE);
             mBinding.localSurfaceLayout.setVisibility(View.VISIBLE);
             mBinding.llVideoCalled.setVisibility(View.VISIBLE);
             mBinding.llVideoCallingOutAndOngoingControl.setVisibility(View.VISIBLE);
@@ -643,7 +643,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             mBinding.llVoiceCallingHead.setVisibility(View.GONE);
         } else {
             mBinding.llVideoCallingOutAndOngoingControl.setVisibility(View.GONE);
-            mBinding.groupOngoingSettings.setVisibility(View.VISIBLE);
+            mBinding.chronometer.setVisibility(View.VISIBLE);
             mBinding.ivAvatar.setVisibility(View.VISIBLE);
             mBinding.localSurfaceLayout.setVisibility(View.GONE);
             mBinding.oppositeSurfaceLayout.setVisibility(View.GONE);
@@ -681,7 +681,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             //oppositeSurface_layout.setVisibility(View.GONE);
         }
         mBinding.llComingCallVoice.setVisibility(View.GONE);
-        mBinding.groupOngoingSettings.setVisibility(View.GONE);
+        mBinding.chronometer.setVisibility(View.GONE);
         mBinding.localSurfaceLayout.setVisibility(View.GONE);
         mBinding.llVideoCloseControl.setVisibility(View.GONE);
         mBinding.btnCallFloat.setVisibility(View.VISIBLE);

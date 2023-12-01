@@ -1534,7 +1534,11 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 EaseCallKit.getInstance().releaseCall();
                 RtcEngine.destroy();
 
-                finish();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finishAndRemoveTask();
+                }else{
+                    finish();
+                }
             }
         });
     }

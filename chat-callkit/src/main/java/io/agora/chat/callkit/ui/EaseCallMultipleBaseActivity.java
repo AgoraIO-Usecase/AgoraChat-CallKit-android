@@ -1515,7 +1515,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                 EaseCallKit.getInstance().setCallID(null);
                 EaseCallKit.getInstance().releaseCall();
                 RtcEngine.destroy();
-                finish();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finishAndRemoveTask();
+                }else{
+                    finish();
+                }
             }
         });
     }

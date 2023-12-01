@@ -151,7 +151,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         @Override
         public void onError(int err) {
             super.onError(err);
-            EMLog.d(TAG, "IRtcEngineEventHandler onError:" + err);
+            EMLog.e(TAG, "IRtcEngineEventHandler onError:" + err);
             if (listener != null) {
                 listener.onCallError(EaseCallError.RTC_ERROR, err, "rtc error");
             }

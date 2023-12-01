@@ -47,6 +47,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -459,6 +460,152 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     };
     private SimpleDateFormat dateFormat;
+    private Observer<EaseCallBaseEvent> callEventObserver = new Observer<EaseCallBaseEvent>(){
+
+        @Override
+        public void onChanged(EaseCallBaseEvent event) {
+            if (event != null) {
+                switch (event.callAction) {
+                    case CALL_ALERT:
+                        EaseCallAlertEvent alertEvent = (EaseCallAlertEvent) event;
+                        //Determine whether the session is valid
+                        EaseCallConfirmRingEvent ringEvent = new EaseCallConfirmRingEvent();
+                        String user = alertEvent.userId;
+                        if (TextUtils.equals(alertEvent.callId, EaseCallKit.getInstance().getCallID())
+                                && invitedUsersTime.containsKey(user)) {
+                            //Send a valid session message
+                            ringEvent.calleeDevId = alertEvent.calleeDevId;
+                            ringEvent.valid = true;
+                            ringEvent.userId = alertEvent.userId;
+                            sendCmdMsg(ringEvent, alertEvent.userId);
+                        } else {
+                            //Invalid session message was sent
+                            ringEvent.calleeDevId = alertEvent.calleeDevId;
+                            ringEvent.valid = false;
+                            sendCmdMsg(ringEvent, alertEvent.userId);
+                        }
+                        //A session confirmation message has been sent.
+                        mConfirRing = true;
+                        break;
+                    case CALL_CANCEL:
+                        if (userIdAndUidMap.get(event.userId) == null && !TextUtils.equals(event.userId, ChatClient.getInstance().getCurrentUser())) {
+                            //An event sent by a strange third party
+                            break;
+                        }
+                        if (!isInComingCall) {
+                            //Stop quorum timer
+                            timeHandler.stopTime();
+                        }
+                        //cancel call
+                        exitChannel();
+                        break;
+                    case CALL_ANSWER:
+                        EaseCallAnswerEvent answerEvent = (EaseCallAnswerEvent) event;
+                        EaseCallConfirmCallEvent callEvent = new EaseCallConfirmCallEvent();
+                        callEvent.calleeDevId = answerEvent.calleeDevId;
+                        callEvent.result = answerEvent.result;
+                        //remove form time recorder
+                        String userId = answerEvent.userId;
+                        invitedUsersTime.remove(userId);
+
+                        if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_BUSY)) {
+                            if (!mConfirRing) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //The other party is busy
+                                        effectiveUsers.remove(userId);
+                                        //Delete placeholders
+                                        EaseCallMemberView placeView = placeholders.remove(userId);
+                                        if (placeView != null) {
+                                            mBinding.surfaceViewGroup.removeView(placeView);
+                                        }
+                                        if (listener != null) {
+                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, mBinding.chronometer.getCostSeconds() * 1000);
+                                        }
+                                        // check placeholders state
+                                        if (placeholders.size() == 0) {
+                                            EaseCallAudioControl.getInstance().stopPlayRing();
+                                        }
+                                    }
+                                });
+                            } else {
+                                sendCmdMsg(callEvent, username);
+                            }
+                        } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
+                            //set call answered state
+                            EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
+                            sendCmdMsg(callEvent, answerEvent.userId);
+                        } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
+                            sendCmdMsg(callEvent, answerEvent.userId);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    effectiveUsers.remove(userId);
+                                    //Delete placeholders
+                                    EaseCallMemberView placeView = placeholders.remove(userId);
+                                    if (placeView != null) {
+                                        mBinding.surfaceViewGroup.removeView(placeView);
+                                    }
+                                }
+                            });
+                            if (listener != null) {
+                                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRefuse, 0);
+                            }
+                            //  check placeholders state
+                            if (placeholders.size() == 0) {
+                                EaseCallAudioControl.getInstance().stopPlayRing();
+                            }
+                        }
+                        break;
+                    case CALL_CONFIRM_RING:
+                        break;
+                    case CALL_CONFIRM_CALLEE:
+                        EaseCallConfirmCallEvent confirmEvent = (EaseCallConfirmCallEvent) event;
+                        String deviceId = confirmEvent.calleeDevId;
+                        String result = confirmEvent.result;
+                        timeHandler.stopTime();
+                        //is self
+                        if (TextUtils.equals(deviceId, EaseCallKit.deviceId)) {
+                            //answer accept
+                            if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
+                                joinChannel();
+                            } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
+                                //exit call
+                                exitChannel();
+                            }
+                        } else {
+                            //exit call
+                            exitChannel();
+                        }
+                        break;
+                }
+            }
+        }
+    };
+    private Observer<EaseCallUserInfo> userInfoObserver=new Observer<EaseCallUserInfo>() {
+        @Override
+        public void onChanged(EaseCallUserInfo userInfo) {
+            if (userInfo != null) {
+                //Update local avatar nicknames
+                EaseCallKit.getInstance().getCallKitConfig().setUserInfo(userInfo.getUserId(), userInfo);
+                if (userInfo.getUserId() != null) {
+                    if (userIdAndUidMap.containsKey(userInfo.getUserId())) {
+                        int uid = userIdAndUidMap.get(userInfo.getUserId());
+                        updateUserInfo(uid);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (TextUtils.equals(username, userInfo.getUserId()) && mBinding.incomingCallView != null) {
+                                    mBinding.incomingCallView.setInviteInfo(username, groupId, callType);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -817,151 +964,13 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         }
     }
 
-
     /**
      * add liveDate listener
      */
     protected void addLiveDataObserver() {
-        EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString(), EaseCallBaseEvent.class).observe(this, event -> {
-            if (event != null) {
-                switch (event.callAction) {
-                    case CALL_ALERT:
-                        EaseCallAlertEvent alertEvent = (EaseCallAlertEvent) event;
-                        //Determine whether the session is valid
-                        EaseCallConfirmRingEvent ringEvent = new EaseCallConfirmRingEvent();
-                        String user = alertEvent.userId;
-                        if (TextUtils.equals(alertEvent.callId, EaseCallKit.getInstance().getCallID())
-                                && invitedUsersTime.containsKey(user)) {
-                            //Send a valid session message
-                            ringEvent.calleeDevId = alertEvent.calleeDevId;
-                            ringEvent.valid = true;
-                            ringEvent.userId = alertEvent.userId;
-                            sendCmdMsg(ringEvent, alertEvent.userId);
-                        } else {
-                            //Invalid session message was sent
-                            ringEvent.calleeDevId = alertEvent.calleeDevId;
-                            ringEvent.valid = false;
-                            sendCmdMsg(ringEvent, alertEvent.userId);
-                        }
-                        //A session confirmation message has been sent.
-                        mConfirRing = true;
-                        break;
-                    case CALL_CANCEL:
-                        if (userIdAndUidMap.get(event.userId) == null && !TextUtils.equals(event.userId, ChatClient.getInstance().getCurrentUser())) {
-                            //An event sent by a strange third party
-                            break;
-                        }
-                        if (!isInComingCall) {
-                            //Stop quorum timer
-                            timeHandler.stopTime();
-                        }
-                        //cancel call
-                        exitChannel();
-                        break;
-                    case CALL_ANSWER:
-                        EaseCallAnswerEvent answerEvent = (EaseCallAnswerEvent) event;
-                        EaseCallConfirmCallEvent callEvent = new EaseCallConfirmCallEvent();
-                        callEvent.calleeDevId = answerEvent.calleeDevId;
-                        callEvent.result = answerEvent.result;
-                        //remove form time recorder
-                        String userId = answerEvent.userId;
-                        invitedUsersTime.remove(userId);
+        EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString(), EaseCallBaseEvent.class).observeForever(callEventObserver);
 
-                        if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_BUSY)) {
-                            if (!mConfirRing) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //The other party is busy
-                                        effectiveUsers.remove(userId);
-                                        //Delete placeholders
-                                        EaseCallMemberView placeView = placeholders.remove(userId);
-                                        if (placeView != null) {
-                                            mBinding.surfaceViewGroup.removeView(placeView);
-                                        }
-                                        if (listener != null) {
-                                            listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonBusy, mBinding.chronometer.getCostSeconds()*1000);
-                                        }
-                                        // check placeholders state
-                                        if (placeholders.size() == 0) {
-                                            EaseCallAudioControl.getInstance().stopPlayRing();
-                                        }
-                                    }
-                                });
-                            } else {
-                                sendCmdMsg(callEvent, username);
-                            }
-                        } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                            //set call answered state
-                            EaseCallKit.getInstance().setCallState(EaseCallState.CALL_ANSWERED);
-                            sendCmdMsg(callEvent, answerEvent.userId);
-                        } else if (TextUtils.equals(answerEvent.result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
-                            sendCmdMsg(callEvent, answerEvent.userId);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    effectiveUsers.remove(userId);
-                                    //Delete placeholders
-                                    EaseCallMemberView placeView = placeholders.remove(userId);
-                                    if (placeView != null) {
-                                        mBinding.surfaceViewGroup.removeView(placeView);
-                                    }
-                                }
-                            });
-                            if (listener != null) {
-                                listener.onEndCallWithReason(callType, channelName, EaseCallEndReason.EaseCallEndReasonRefuse, 0);
-                            }
-                            //  check placeholders state
-                            if (placeholders.size() == 0) {
-                                EaseCallAudioControl.getInstance().stopPlayRing();
-                            }
-                        }
-                        break;
-                    case CALL_CONFIRM_RING:
-                        break;
-                    case CALL_CONFIRM_CALLEE:
-                        EaseCallConfirmCallEvent confirmEvent = (EaseCallConfirmCallEvent) event;
-                        String deviceId = confirmEvent.calleeDevId;
-                        String result = confirmEvent.result;
-                        timeHandler.stopTime();
-                        //is self
-                        if (TextUtils.equals(deviceId, EaseCallKit.deviceId)) {
-                            //answer accept
-                            if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_ACCEPT)) {
-                                joinChannel();
-                            } else if (TextUtils.equals(result, EaseCallMsgUtils.CALL_ANSWER_REFUSE)) {
-                                //exit call
-                                exitChannel();
-                            }
-                        } else {
-                            //exit call
-                            exitChannel();
-                        }
-                        break;
-                }
-            }
-        });
-
-        EaseCallLiveDataBus.get().with(EaseCallKitUtils.UPDATE_USERINFO, EaseCallUserInfo.class).observe(this, userInfo -> {
-            if (userInfo != null) {
-                //Update local avatar nicknames
-                EaseCallKit.getInstance().getCallKitConfig().setUserInfo(userInfo.getUserId(), userInfo);
-                if (userInfo.getUserId() != null) {
-                    if (userIdAndUidMap.containsKey(userInfo.getUserId())) {
-                        int uid = userIdAndUidMap.get(userInfo.getUserId());
-                        updateUserInfo(uid);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (TextUtils.equals(username, userInfo.getUserId()) && mBinding.incomingCallView != null) {
-                                    mBinding.incomingCallView.setInviteInfo(username, groupId, callType);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        });
+        EaseCallLiveDataBus.get().with(EaseCallKitUtils.UPDATE_USERINFO, EaseCallUserInfo.class).observeForever(userInfoObserver);
     }
 
 
@@ -1751,6 +1760,14 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         if (inChannelViews != null) {
             inChannelViews.clear();
         }
+        if(callEventObserver!=null) {
+            EaseCallLiveDataBus.get().with(EaseCallType.SINGLE_VIDEO_CALL.toString(), EaseCallBaseEvent.class).removeObserver(callEventObserver);
+        }
+
+        if(userInfoObserver!=null) {
+            EaseCallLiveDataBus.get().with(EaseCallKitUtils.UPDATE_USERINFO, EaseCallUserInfo.class).removeObserver(userInfoObserver);
+        }
+
         if (!isFloatWindowShowing()) {
             if (userIdAndUidMap != null) {
                 userIdAndUidMap.clear();

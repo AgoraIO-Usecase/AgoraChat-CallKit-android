@@ -288,6 +288,14 @@
         app:layout_constraintRight_toRightOf="@id/btn_hangup_call"
         app:layout_constraintTop_toBottomOf="@id/btn_hangup_call" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_chronometer"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="btn_hangup_call,btn_video_hangup_call,iv_video_mute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+<!--    计时器-->
     <io.agora.chat.callkit.widget.EaseCallChronometer
         android:id="@+id/chronometer"
         android:layout_width="wrap_content"
@@ -295,10 +303,12 @@
         android:layout_marginBottom="17dp"
         android:text="Chronometer"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/btn_hangup_call"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/barrier_chronometer"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         tools:ignore="HardcodedText" />
+
 
     <ImageView
         android:id="@+id/iv_vidicon_video_calling"
@@ -345,13 +355,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/iv_mute"
         app:layout_constraintRight_toRightOf="parent" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/group_ongoing_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="chronometer" />
 
     <ImageButton
         android:id="@+id/btn_refuse_call"

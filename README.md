@@ -2,6 +2,12 @@ AgoraChatCallKit is an open-source audio and video UI library developed based on
 
 This page describes how to implement real-time audio and video communications using the AgoraChatCallKit.
 
+### Sample project
+
+Agora provides an open-source [AgoraChat-android](https://github.com/AgoraIO-Usecase/AgoraChat-android) sample project on GitHub. You can download the sample to try it out or view the source code.
+
+The sample project uses the Agora Chat user ID to join a channel, which enables displaying the user ID in the view of the call. If you use the methods of the Agora RTC SDK to start a call, you can also use the Integer UID to join a channel.
+
 ## Understand the tech
 
 The basic process for implementing real-time audio and video communications with AgoraChatCallKit is as follows:
@@ -17,7 +23,7 @@ Before proceeding, ensure that your development environment meets the following 
 
 - [Java Development Kit](https://www.oracle.com/java/technologies/downloads/) 1.8 or later.
 - Android Studio 3.5 or later.
-- `targetSdkVersion` 30.
+- `targetSdkVersion` 33.
 - `minSdkVersion` 21.
 - Gradle 4.6 or later.
 - An Agora Chat project that has integrated the Chat SDK and implemented the [basic real-time chat functionalities](https://docs.agora.io/en/agora-chat/get-started/get-started-sdk), including users logging in and out and sending and receiving messages.
@@ -28,12 +34,12 @@ Take the following steps to integrate the AgoraChatCallKit into your project and
 
 1. Add the dependency
 
-    AgoraChatCallKit is developed upon `io.agora.rtc:chat-sdk:x.x.x` (1.0.5 and later) and `io.agora.rtc:full-rtc-basic:x.x.x` (3.6.2 and later). Follow the steps to add AgoraChatCallKit using Gradle.
+    AgoraChatCallKit is developed upon `io.agora.rtc:chat-sdk:x.x.x` (1.2.0 and later) and `io.agora.rtc:full-rtc-basic:x.x.x` (4.1.0 and later). Follow the steps to add AgoraChatCallKit using Gradle.
 
     In `/Gradle Scripts/build.gradle(Module: <projectname>.app)`, add the following lines to integrate the AgoraChatCallKit into your Android project:
 
     ```java
-    implementation 'io.agora.rtc:chat-callkit:1.0.8'
+    implementation 'io.agora.rtc:chat-callkit:1.1.0'
     ```
 <div class="alert note"><ul><li>For the latest callkit version, go to <a href="https://search.maven.org/search?q=a:chat-callkit">Sonatype</a>.</li></ul></div>
 
@@ -60,18 +66,22 @@ Take the following steps to integrate the AgoraChatCallKit into your project and
 
     ```xml
     <activity
-        android:name=".av.CallSingleBaseActivity"
-        android:configChanges="orientation|keyboardHidden|screenSize"
-        android:excludeFromRecents="true"
-        android:label="@string/demo_activity_label_video_call"
-        android:launchMode="singleInstance"
-        android:screenOrientation="portrait" />
+            android:name=".av.SingleCallActivity"
+            android:exported="false"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/demo_activity_label_video_call"
+            android:taskAffinity=".SingleCallTask"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait" />
     <activity
-        android:name=".av.CallMultipleBaseActivity"
+        android:name=".av.MultipleCallActivity"
+        android:exported="false"
         android:configChanges="orientation|keyboardHidden|screenSize"
-        android:excludeFromRecents="true"
         android:label="@string/demo_activity_label_multi_call"
+        android:taskAffinity=".MultipleCallTask"
         android:launchMode="singleInstance"
+        android:excludeFromRecents="true"
         android:screenOrientation="portrait" />
     ```
 
@@ -106,10 +116,10 @@ callKitConfig.setUserInfoMap(userInfoMap);
 // Call init to initialie EaseCallKit.
 EaseCallKit.getInstance().init(context, callKitConfig);
 // Register the activity added in the Manifest file.
-EaseCallKit.getInstance().registerVideoCallClass(CallSingleBaseActivity.class);
-EaseCallKit.getInstance().registerMultipleVideoClass(CallMultipleBaseActivity.class);
+EaseCallKit.getInstance().registerVideoCallClass(SingleCallActivity.class);
+EaseCallKit.getInstance().registerMultipleVideoClass(MultipleCallActivity.class);
 // Add event listeners to the AgoraChatCallKit.
-addCallkitListener();
+EaseCallKit.getInstance().setCallKitListener(new DemoCallKitListener(mContext,getUsersManager()));
 ```
 
 In this method, you need to set the `EaseCallKitConfig` class. Some of the configurations include the following:
@@ -155,6 +165,9 @@ From the caller's client, call `startSingleCall` or `startInviteMultipleCall` to
     * @param ext  The extension information in the call invitation. Set it as null if you do not need this information.
     */
     public void startSingleCall(final EaseCallType type, final String user, final Map<String, Object> ext){}
+  
+    //for example 
+    EaseCallKit.getInstance().startSingleCall(SINGLE_VIDEO_CALL,conversationId,null, SingleCallActivity.class);
     ```
 
 The following screenshot gives an example of the user interface after sending a call invitation for one-to-one audio call:
@@ -176,6 +189,11 @@ The following screenshot gives an example of the user interface after sending a 
     * @param ext  The extension information in the call invitation. Set it as null if you do not need this information.
     */
     public void startInviteMultipleCall(final EaseCallType type, final String[] users, final Map<String, Object> ext) {}
+  
+    //for example 
+    Map<String, Object> ext = new HashMap<>();
+    ext.put("groupId", groupId);
+    EaseCallKit.getInstance().startInviteMultipleCall(callType, userIds, ext);
     ```
 
 ### Receive the invitation
@@ -421,11 +439,4 @@ The AgoraChatCallKit provides the following APIs:
 | --- | --- |
 | onSetToken | Occurs when the app passes the retrieved RTC token to the AgoraChatCallKit. |
 | onGetTokenError | Occurs when the app fails to get the RTC token. |
-
-
-### Sample project
-
-Agora provides an open-source [AgoraChat-android](https://github.com/AgoraIO-Usecase/AgoraChat-android) sample project on GitHub. You can download the sample to try it out or view the source code.
-
-The sample project uses the Agora Chat user ID to join a channel, which enables displaying the user ID in the view of the call. If you use the methods of the Agora RTC SDK to start a call, you can also use the Integer UID to join a channel.
 

@@ -264,8 +264,9 @@ public class EaseCallMemberViewGroup extends ViewGroup implements View.OnClickLi
                 lp.width = mWidth;
                 lp.height = mHeight;
             } else {
-                lp.width = 0;
-                lp.height = 0;
+                //Cannot be 0, because abnormal behavior may occur on some phones
+                lp.width = 1;
+                lp.height = 1;
             }
             child.setLayoutParams(lp);
         }

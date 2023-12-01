@@ -10,6 +10,10 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VOICE
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_RELEASE_HANDLER;
 import static io.agora.rtc2.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
 import static io.agora.rtc2.Constants.CLIENT_ROLE_BROADCASTER;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -221,6 +225,23 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                     remoteUId = uid;
                     if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
                         updateViewWithCameraStatus();
+                    }
+                }
+            });
+        }
+        @Override
+        public void onRemoteVideoStateChanged(int uid, int state, int reason, int elapsed) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
+                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
+                            isRemoteVideoMuted = true;
+                            updateViewWithCameraStatus();
+                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                            isRemoteVideoMuted = false;
+                            updateViewWithCameraStatus();
+                        }
                     }
                 }
             });

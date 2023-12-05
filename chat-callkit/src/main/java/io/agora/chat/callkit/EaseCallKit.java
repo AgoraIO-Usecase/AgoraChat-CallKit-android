@@ -1069,7 +1069,7 @@ public class EaseCallKit {
                         } else {
                             info = mContext.getString(R.string.ease_call_alert_request_voice, userName);
                         }
-                        notifier.notify(intent, mContext.getString(R.string.ease_call_easemob), info);
+                        notifier.notify(intent, mContext.getString(R.string.ease_call_agora), info);
                     }
                 } else {
                     // Start the multi-party call screen
@@ -1085,7 +1085,7 @@ public class EaseCallKit {
                     mContext.startActivity(intent);
                     if (Build.VERSION.SDK_INT >= 29 && isAppRunningForeground(mContext)) {
                         info = mContext.getString(R.string.ease_call_alert_request_multiple_video, userName);
-                        notifier.notify(intent, mContext.getString(R.string.ease_call_easemob), info);
+                        notifier.notify(intent, mContext.getString(R.string.ease_call_agora), info);
                     }
                 }
 

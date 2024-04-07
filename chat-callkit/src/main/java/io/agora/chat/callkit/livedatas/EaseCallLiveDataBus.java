@@ -61,7 +61,7 @@ public final class EaseCallLiveDataBus {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             if (stackTrace != null && stackTrace.length > 0) {
                 for (StackTraceElement element : stackTrace) {
-                    if ("android.arch.lifecycle.LiveData".equals(element.getClassName()) &&
+                    if (element.getClassName().contains("BusMutableLiveData") &&
                             "observeForever".equals(element.getMethodName())) {
                         return true;
                     }

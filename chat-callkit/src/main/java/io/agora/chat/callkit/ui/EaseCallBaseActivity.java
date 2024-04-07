@@ -17,6 +17,7 @@ public class EaseCallBaseActivity extends AppCompatActivity {
     protected final int REQUEST_CODE_OVERLAY_PERMISSION = 1002;
     // To prevent opening the request hover page multiple times
     protected boolean requestOverlayPermission;
+    private final String TAG =getClass().getSimpleName();
 
     /**
      * Check whether float window is showing
@@ -54,6 +55,7 @@ public class EaseCallBaseActivity extends AppCompatActivity {
 
     public void doShowFloatWindow() {}
 
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -62,4 +64,5 @@ public class EaseCallBaseActivity extends AppCompatActivity {
             showFloatWindow();
         }
     }
+
 }

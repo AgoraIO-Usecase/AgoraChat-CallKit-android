@@ -82,7 +82,7 @@ public class EaseCallFloatWindow {
     private boolean isRemoteVideoMuted;
     private String currentInstanceName;
 
-    public EaseCallFloatWindow(Context context) {
+    private EaseCallFloatWindow(Context context) {
         initFloatWindow(context);
     }
 
@@ -127,7 +127,9 @@ public class EaseCallFloatWindow {
 
     private void initFloatWindow(Context context) {
         currentInstanceName =context.toString();
-        this.context = context.getApplicationContext();
+        //This parameter is held by a single instance to prevent EaseCallBaseActivity from being recycled,
+        // which may cause abnormal signaling communication in the activity and empty the suspension window when it disappears
+        this.context = context;
         windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
         windowManager.getDefaultDisplay().getSize(point);
@@ -271,6 +273,10 @@ public class EaseCallFloatWindow {
         }
     }
 
+    public View getFloatView(){
+        return floatView;
+    }
+
     /**
      * Should call the method before call {@link #dismiss()}
      * @return Cost seconds in float window
@@ -288,9 +294,6 @@ public class EaseCallFloatWindow {
      * @return Total cost seconds
      */
     public long getTotalCostSeconds() {
-        if(chronometer != null) {
-            Log.e("activity", "costSeconds: "+chronometer.getCostSeconds());
-        }
         if(chronometer != null) {
             return costSeconds + chronometer.getCostSeconds();
         }
@@ -317,9 +320,6 @@ public class EaseCallFloatWindow {
         memberView = view;
         uId = memberView.getUserId();
         if (memberView.isShowVideo()) {
-            floatView.findViewById(R.id.layout_call_voice).setVisibility(View.VISIBLE);
-            floatView.findViewById(R.id.layout_call_video).setVisibility(View.GONE);
-        } else {
             floatView.findViewById(R.id.layout_call_voice).setVisibility(View.GONE);
             floatView.findViewById(R.id.layout_call_video).setVisibility(View.VISIBLE);
 
@@ -327,6 +327,9 @@ public class EaseCallFloatWindow {
             int uId = memberView.getUserId();
             boolean isSelf = TextUtils.equals(userAccount, ChatClient.getInstance().getCurrentUser());
             prepareSurfaceView(isSelf,uId);
+        } else {
+            floatView.findViewById(R.id.layout_call_voice).setVisibility(View.VISIBLE);
+            floatView.findViewById(R.id.layout_call_video).setVisibility(View.GONE);
         }
         handler.removeMessages(UPDATA_FLOAT_WINDOW_TIME);
         handler.sendEmptyMessage(UPDATA_FLOAT_WINDOW_TIME);
@@ -417,6 +420,7 @@ public class EaseCallFloatWindow {
         handler.removeCallbacksAndMessages(null);
         currentInstanceName=null;
         rtcEngine = null;
+        context=null;
     }
 
     public void resetCurrentInstance(){
@@ -507,7 +511,7 @@ public class EaseCallFloatWindow {
          */
         public static class ViewState {
             // video state
-            public boolean isVideoOff;
+            public boolean isShowVideo;
             // audio state
             public boolean isAudioOff;
             // screen mode

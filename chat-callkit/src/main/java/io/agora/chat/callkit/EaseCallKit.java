@@ -110,6 +110,7 @@ public class EaseCallKit {
     private Handler handler;
     private View headview;
     private int largestNumInChannel = 16;
+    private boolean isAgreedInHeadDialog = false;
     /**
      * If use the default class, you should register it to AndroidManifest
      */
@@ -132,6 +133,14 @@ public class EaseCallKit {
             }
         }
         return instance;
+    }
+
+    public boolean isAgreedInHeadDialog() {
+        return isAgreedInHeadDialog;
+    }
+
+    public void setAgreedInHeadDialog(boolean agreedInHeadDialog) {
+        isAgreedInHeadDialog = agreedInHeadDialog;
     }
 
     /**
@@ -1004,7 +1013,6 @@ public class EaseCallKit {
         private final int MSG_TIMER = 0;
         private final int MSG_START_ACTIVITY = 1;
         private int timePassed = 0;
-        private boolean isAgreedInHeadDialog = false;
 
         public TimeHandler() {
 
@@ -1015,8 +1023,8 @@ public class EaseCallKit {
             sendEmptyMessageDelayed(MSG_TIMER, 1000);
         }
 
-        public void startSendEvent(boolean isAgreedInHeadDialog) {
-            this.isAgreedInHeadDialog = isAgreedInHeadDialog;
+        public void startSendEvent(boolean _isAgreedInHeadDialog) {
+            isAgreedInHeadDialog = _isAgreedInHeadDialog;
             sendEmptyMessage(MSG_START_ACTIVITY);
         }
 
@@ -1200,6 +1208,10 @@ public class EaseCallKit {
                 //reset state
                 setCallState(EaseCallState.CALL_IDLE);
                 setCallID(null);
+                isAgreedInHeadDialog=false;
+                isComingCall=false;
+                fromUserId=null;
+                channelName=null;
             }
         });
     }

@@ -82,7 +82,7 @@ public class EaseCallFloatWindow {
     private boolean isRemoteVideoMuted;
     private String currentInstanceName;
 
-    public EaseCallFloatWindow(Context context) {
+    private EaseCallFloatWindow(Context context) {
         initFloatWindow(context);
     }
 
@@ -127,7 +127,9 @@ public class EaseCallFloatWindow {
 
     private void initFloatWindow(Context context) {
         currentInstanceName =context.toString();
-        this.context = context.getApplicationContext();
+        //This parameter is held by a single instance to prevent EaseCallBaseActivity from being recycled,
+        // which may cause abnormal signaling communication in the activity and empty the suspension window when it disappears
+        this.context = context;
         windowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
         windowManager.getDefaultDisplay().getSize(point);
@@ -293,9 +295,6 @@ public class EaseCallFloatWindow {
      */
     public long getTotalCostSeconds() {
         if(chronometer != null) {
-            Log.e("activity", "costSeconds: "+chronometer.getCostSeconds());
-        }
-        if(chronometer != null) {
             return costSeconds + chronometer.getCostSeconds();
         }
         Log.e(TAG, "chronometer is null, can not get total cost seconds");
@@ -421,6 +420,7 @@ public class EaseCallFloatWindow {
         handler.removeCallbacksAndMessages(null);
         currentInstanceName=null;
         rtcEngine = null;
+        context=null;
     }
 
     public void resetCurrentInstance(){

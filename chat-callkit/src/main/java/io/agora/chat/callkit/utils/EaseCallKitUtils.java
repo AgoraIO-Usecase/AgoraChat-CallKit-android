@@ -128,8 +128,8 @@ public class EaseCallKitUtils {
             if (userInfoMap != null) {
                 EaseCallUserInfo userInfo = userInfoMap.get(userId);
                 if (userInfo != null) {
-                    if (userInfo.getNickName() != null && userInfo.getNickName().length() > 0) {
-                        return userInfo.getNickName();
+                    if (userInfo.getNickname() != null && userInfo.getNickname().length() > 0) {
+                        return userInfo.getNickname();
                     }
                 }
             }

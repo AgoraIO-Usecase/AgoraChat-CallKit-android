@@ -64,7 +64,7 @@ public class EaseCallKitConfig {
             for (String userId : userSet) {
                 EaseCallUserInfo userInfo = userMap.get(userId);
                 if (userInfo != null) {
-                    EaseCallUserInfo newUserInfo = new EaseCallUserInfo(userInfo.getNickName(), userInfo.getHeadImage());
+                    EaseCallUserInfo newUserInfo = new EaseCallUserInfo(userInfo.getNickname(), userInfo.getHeadImage());
                     userInfoMap.put(userId, newUserInfo);
                 } else {
                     userInfoMap.put(userId, null);

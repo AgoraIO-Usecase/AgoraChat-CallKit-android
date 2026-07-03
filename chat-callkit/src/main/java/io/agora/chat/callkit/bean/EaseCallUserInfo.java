@@ -27,7 +27,7 @@ public class EaseCallUserInfo {
      * Gets the user's nickname
      * @return the user's nickname
      */
-    public String getNickName() {
+    public String getNickname() {
         return nickName;
     }
 

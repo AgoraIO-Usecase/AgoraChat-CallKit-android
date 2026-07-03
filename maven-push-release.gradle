@@ -1,16 +1,20 @@
 group = "io.agora.rtc"
-archivesBaseName = "chat-callkit"
-version = project.sdkVersion//发布aar的库版本
-apply plugin: 'maven'
+ext.archivesBaseName = "chat-callkit"
+def releaseSdkVersion = project.findProperty('sdkVersion') ?: rootProject.findProperty('sdkVersion')
+version = releaseSdkVersion//发布aar的库版本
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-def repositoryId = project.stagingRepositoryId
+def repositoryId = project.findProperty('stagingRepositoryId') ?: rootProject.findProperty('stagingRepositoryId')
 
 def localProperties = new Properties()
 localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 Properties properties = new Properties()
-properties.load(file(localProperties.getProperty('maven.dir')+"./project.properties").newDataInputStream())
+def mavenPropertiesFile = file(localProperties.getProperty('maven.dir')+"./project.properties")
+if (mavenPropertiesFile.exists()) {
+    properties.load(mavenPropertiesFile.newDataInputStream())
+}
 
 def ossrhUsername = properties.getProperty('ossrhUsername')
 def ossrhPassword = properties.getProperty('ossrhPassword')
@@ -32,96 +36,118 @@ configurations {
     deployerJars
 }
 
-task javadoc(type: Javadoc) {
-    options {
-        encoding 'UTF-8'
-        charSet 'UTF-8'
-    }
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    android.libraryVariants.all { variant ->
-        if (variant.name == 'release') {
-            owner.source = variant.javaCompiler.source
-            owner.classpath = files(android.bootClasspath.join(File.pathSeparator))
-            owner.classpath += variant.javaCompiler.classpath
+plugins.withId('com.android.library') {
+    android {
+        publishing {
+            singleVariant("release")
         }
     }
-    failOnError false
-}
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-nexusStaging {
-    packageGroup = "$group" //optional if packageGroup == project.getGroup()
-    stagingProfileId = "$group" //when not defined will be got from server using "packageGroup"
-    username = ossrhUsername
-    password = ossrhPassword
-    stagingRepositoryId = repositoryId
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+    task javadoc(type: Javadoc) {
+        options {
+            encoding 'UTF-8'
+            charSet 'UTF-8'
+        }
+        source = project.android.sourceSets.main.java.srcDirs
+        classpath += project.files(project.android.getBootClasspath().join(File.pathSeparator))
+        project.android.libraryVariants.all { variant ->
+            if (variant.name == 'release') {
+                owner.source = variant.javaCompiler.source
+                owner.classpath = files(project.android.bootClasspath.join(File.pathSeparator))
+                owner.classpath += variant.javaCompiler.classpath
             }
+        }
+        failOnError false
+    }
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        archiveClassifier.set('javadoc')
+        from javadoc.destinationDir
+    }
 
-            pom.project {
-                //version version
-                name archivesBaseName
-                packaging 'aar'
-                // optionally artifactId can be defined here
-                //println "current groupId:$group"
-                //groupId group
-                //artifactId archivesBaseName
-                description 'Agora SDK CallKit'
-                url 'http://maven.apache.org'
+    task sourcesJar(type: Jar) {
+        from project.android.sourceSets.main.java.srcDirs
+        archiveClassifier.set('sources')
+    }
 
-                scm {
-                    connection 'scm:git:https://github.com/AgoraIO-Usecase/AgoraChat-CallKit-android.git'
-                    developerConnection 'scm:git:https://github.com/AgoraIO-Usecase/AgoraChat-CallKit-android.git'
-                    url 'https://github.com/AgoraIO-Usecase/AgoraChat-CallKit-android'
-                }
+    nexusStaging {
+        packageGroup = "$group" //optional if packageGroup == project.getGroup()
+        stagingProfileId = "$group" //when not defined will be got from server using "packageGroup"
+        username = ossrhUsername
+        password = ossrhPassword
+        stagingRepositoryId = repositoryId
+    }
 
-                licenses {
-                    license {
-                        name 'AGORA SDK License'
-                        url 'https://github.com/AgoraIO/full-sdk/blob/master/LICENSE'
-                    }
-                }
+    afterEvaluate {
+        publishing {
+            publications {
+                release(MavenPublication) {
+                    from components.release
 
-                developers {
-                    developer {
-                        name 'agorabuilder'
-                        email 'zhaoliang@agora.io'
-                        organization 'https://github.com/AgoraIO'
-                        url 'https://www.agora.io/cn'
+                    groupId = project.group
+                    artifactId = project.archivesBaseName
+                    version = project.version
+
+                    artifact sourcesJar
+                    artifact javadocJar
+
+                    pom {
+                        name = project.archivesBaseName
+                        packaging = 'aar'
+                        description = 'Agora SDK CallKit'
+                        url = 'http://maven.apache.org'
+
+                        scm {
+                            connection = 'scm:git:https://github.com/AgoraIO-Usecase/AgoraChat-CallKit-android.git'
+                            developerConnection = 'scm:git:https://github.com/AgoraIO-Usecase/AgoraChat-CallKit-android.git'
+                            url = 'https://github.com/AgoraIO-Usecase/AgoraChat-CallKit-android'
+                        }
+
+                        licenses {
+                            license {
+                                name = 'AGORA SDK License'
+                                url = 'https://github.com/AgoraIO/full-sdk/blob/master/LICENSE'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                name = 'agorabuilder'
+                                email = 'zhaoliang@agora.io'
+                                organization = 'https://github.com/AgoraIO'
+                                url = 'https://www.agora.io/cn'
+                            }
+                        }
                     }
                 }
             }
+
+            repositories {
+                maven {
+                    name = 'sonatype'
+                    url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+                maven {
+                    name = 'snapshot'
+                    url = uri('https://oss.sonatype.org/content/repositories/snapshots/')
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+                maven {
+                    name = 'manual'
+                    url = uri("${rootProject.buildDir}/manual-maven")
+                }
+            }
+        }
+
+        signing {
+            sign publishing.publications.release
         }
     }
 }
-

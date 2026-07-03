@@ -1,17 +1,14 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// 新增 buildscript
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.2.2"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-        //Automating closing and releasing
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
+        // Note: If you use HuaWei or Honor push, you need to add the following dependencies
+        classpath("com.android.tools.build:gradle:8.6.1")
+        classpath("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0")
     }
+}
+plugins {
+    id 'com.android.application' version '8.6.1' apply false
+    id 'com.android.library' version '8.6.1' apply false
 }
 
 ext{
@@ -20,14 +17,6 @@ ext{
     }
     if(!project.hasProperty('stagingRepositoryId')){
         stagingRepositoryId = 'iohyphenate-1000'
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven{url 'https://jitpack.io'}
     }
 }
 

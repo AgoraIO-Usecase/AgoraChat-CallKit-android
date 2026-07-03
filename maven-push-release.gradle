@@ -37,6 +37,12 @@ configurations {
 }
 
 plugins.withId('com.android.library') {
+    android {
+        publishing {
+            singleVariant("release")
+        }
+    }
+
     task javadoc(type: Javadoc) {
         options {
             encoding 'UTF-8'

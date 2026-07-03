@@ -69,3 +69,47 @@ Result: passed with no output.
 - Legacy API check: old `maven` plugin, `uploadArchives`, `mavenDeployer`, `artifacts { archives ... }`, and `sign configurations.archives` are no longer present.
 - Task wiring check: target maven-publish tasks are registered and visible when applying the script via the requested init script.
 - Remaining concern: full local manual publish could not be verified in this environment because build prerequisites failed before the publish task executed.
+
+---
+
+Status: DONE_WITH_CONCERNS
+Time: 2026-07-03 17:00:06 CST
+
+## Post-review Compatibility Fix
+
+- Added AGP 8 publishing variant declaration in `maven-push-release.gradle`:
+  `android { publishing { singleVariant("release") } }`.
+- Preserved the existing `release(MavenPublication)` block, Maven coordinates, repositories, POM metadata, signing behavior, and `manual` repository.
+- Kept `chat-callkit/build.gradle` unchanged; `//apply from: "../maven-push-release.gradle"` remains commented.
+
+## Verification
+
+Commands run:
+
+```bash
+printf "%s\n" "allprojects {" "    if (path == ':chat-callkit') {" "        apply from: rootProject.file('maven-push-release.gradle')" "    }" "}" > /tmp/apply-maven-push-release.gradle
+```
+
+Result: init script created with the requested contents.
+
+```bash
+sh ./gradlew :chat-callkit:tasks --all -I /tmp/apply-maven-push-release.gradle
+```
+
+Result: `BUILD SUCCESSFUL`; output included `publishReleasePublicationToManualRepository`.
+
+```bash
+sh ./gradlew :chat-callkit:publishReleasePublicationToManualRepository -I /tmp/apply-maven-push-release.gradle
+```
+
+Result: failed at `:chat-callkit:signReleasePublication`:
+
+```text
+Cannot perform signing task ':chat-callkit:signReleasePublication' because it has no configured signatory
+```
+
+```bash
+git diff --check -- maven-push-release.gradle
+```
+
+Result: passed with no output.

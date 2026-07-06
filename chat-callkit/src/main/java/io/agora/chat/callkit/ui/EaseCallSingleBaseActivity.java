@@ -10,7 +10,7 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VOICE
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_RELEASE_HANDLER;
 import static io.agora.rtc2.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
 import static io.agora.rtc2.Constants.CLIENT_ROLE_BROADCASTER;
-import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_DECODING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
@@ -238,7 +238,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
                             isRemoteVideoMuted = true;
                             updateViewWithCameraStatus();
-                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        } else if (state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             isRemoteVideoMuted = false;
                             updateViewWithCameraStatus();
                         }
@@ -1046,7 +1046,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         mBinding.oppositeSurfaceLayout.setVisibility(View.VISIBLE);
         if (idInOppositeSurfaceLayout != uid) {
             idInOppositeSurfaceLayout = uid;
-            SurfaceView localview = RtcEngine.CreateRendererView(getBaseContext());
+            SurfaceView localview = new SurfaceView(getBaseContext());
             VideoCanvas mLocalVideo = new VideoCanvas(localview, VideoCanvas.RENDER_MODE_HIDDEN, uid);
             if (uid == 0) {
                 mRtcEngine.setupLocalVideo(mLocalVideo);
@@ -1064,7 +1064,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         mBinding.localSurfaceLayout.setVisibility(View.VISIBLE);
         if (idInLocalSurfaceLayout != uid) {
             idInLocalSurfaceLayout = uid;
-            TextureView remoteview = RtcEngine.CreateTextureView(getBaseContext());
+            TextureView remoteview = new TextureView(getBaseContext());
             setBgRadius(remoteview, dp2px(EaseCallSingleBaseActivity.this, 12));
             VideoCanvas mRemoteVideo = new VideoCanvas(remoteview, VideoCanvas.RENDER_MODE_HIDDEN, uid);
             if (uid == 0) {

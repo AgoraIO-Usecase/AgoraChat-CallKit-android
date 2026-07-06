@@ -16,7 +16,7 @@ import static io.agora.rtc2.Constants.REMOTE_AUDIO_REASON_REMOTE_UNMUTED;
 import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_DECODING;
 import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STARTING;
 import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STOPPED;
-import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_DECODING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
@@ -300,7 +300,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
                             if (memberView.getSurfaceView() == null) {
                                 SurfaceView surfaceView =
-                                        RtcEngine.CreateRendererView(getApplicationContext());
+                                        new SurfaceView(getApplicationContext());
                                 memberView.addSurfaceView(surfaceView);
                                 surfaceView.setZOrderOnTop(false);
                                 memberView.showVideo(true);
@@ -348,11 +348,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     if (memberView != null) {
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
                             memberView.showVideo(false);
-                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        } else if (state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             memberView.showVideo(true);
                         }
 
-                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             // Determine the video is the current hover window update hover window
                             EaseCallMemberView floatView = EaseCallFloatWindow.getInstance().getCallMemberView();
                             if (floatView != null && floatView.getUserId() == uid) {
@@ -840,7 +840,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
     public EaseCallMemberView createCallMemberView() {
         EaseCallMemberView memberView = new EaseCallMemberView(getApplicationContext());
-        SurfaceView surfaceView = RtcEngine.CreateRendererView(getApplicationContext());
+        SurfaceView surfaceView = new SurfaceView(getApplicationContext());
         surfaceView.setZOrderOnTop(false);
         surfaceView.setZOrderMediaOverlay(false);
         memberView.addSurfaceView(surfaceView);

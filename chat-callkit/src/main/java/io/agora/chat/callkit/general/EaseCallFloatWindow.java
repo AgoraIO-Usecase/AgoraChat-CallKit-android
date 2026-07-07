@@ -437,7 +437,7 @@ public class EaseCallFloatWindow {
     private void prepareSurfaceView(boolean isSelf,int uid) {
         RelativeLayout surfaceLayout = (RelativeLayout) floatView.findViewById(R.id.layout_call_video);
         surfaceLayout.removeAllViews();
-        textureView =RtcEngine.CreateTextureView(EaseCallKit.getInstance().getContext());
+        textureView =new TextureView(EaseCallKit.getInstance().getContext());
         setBgRadius(textureView,dp2px(context,12));
         surfaceLayout.addView(textureView);
         if(isSelf){

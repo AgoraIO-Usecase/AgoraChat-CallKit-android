@@ -41,7 +41,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'io.agora.rtc:full-rtc-basic:4.1.0'
+    implementation 'io.agora.rtc:lite-sdk:4.6.0'
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     //    api project(':hyphenatechatsdk')
     api 'io.agora.rtc:chat-sdk:1.4.0'

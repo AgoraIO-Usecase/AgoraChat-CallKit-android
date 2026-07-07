@@ -102,9 +102,10 @@ public class EaseCallAudioControl {
      */
     public void openSpeakerOn() {
         try {
-            if (!audioManager.isSpeakerphoneOn())
+            if (audioManager != null) {
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 audioManager.setSpeakerphoneOn(true);
-            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,9 +117,8 @@ public class EaseCallAudioControl {
     public void closeSpeakerOn() {
         try {
             if (audioManager != null) {
-                if (audioManager.isSpeakerphoneOn())
-                    audioManager.setSpeakerphoneOn(false);
                 audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                audioManager.setSpeakerphoneOn(false);
             }
         } catch (Exception e) {
             e.printStackTrace();

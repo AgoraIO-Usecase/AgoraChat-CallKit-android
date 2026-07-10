@@ -16,7 +16,7 @@ import static io.agora.rtc2.Constants.REMOTE_AUDIO_REASON_REMOTE_UNMUTED;
 import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_DECODING;
 import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STARTING;
 import static io.agora.rtc2.Constants.REMOTE_AUDIO_STATE_STOPPED;
-import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_DECODING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
@@ -118,6 +118,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     private boolean isMuteState = false;
     private boolean isShowVideo = true;
     private boolean isCameraFront = true;
+    private boolean isSpeakerOn;
     private EaseCallMemberView localMemberView;
     private String agoraAppId = null;
     private boolean isAgreedInHeadDialog;
@@ -160,6 +161,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         @Override
         public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
             EMLog.d(TAG, "onJoinChannelSuccess channel:" + channel + " uid" + uid);
+            applyCurrentAudioRoute();
             // Add channel start timer
             if (!isInComingCall) {
                 ArrayList<String> userList = EaseCallKit.getInstance().getInviteeUsers();
@@ -233,6 +235,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
         public void onUserJoined(int uid, int elapsed) {
             super.onUserJoined(uid, elapsed);
             EaseCallAudioControl.getInstance().stopPlayRing();
+            applyCurrentAudioRoute();
             setUserJoinChannelInfo(null, uid);
         }
 
@@ -280,6 +283,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    applyCurrentAudioRoute();
                     if (isFinishing()) {
                         return;
                     }
@@ -300,7 +304,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
                             if (memberView.getSurfaceView() == null) {
                                 SurfaceView surfaceView =
-                                        RtcEngine.CreateRendererView(getApplicationContext());
+                                        new SurfaceView(getApplicationContext());
                                 memberView.addSurfaceView(surfaceView);
                                 surfaceView.setZOrderOnTop(false);
                                 memberView.showVideo(true);
@@ -348,11 +352,11 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     if (memberView != null) {
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
                             memberView.showVideo(false);
-                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        } else if (state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             memberView.showVideo(true);
                         }
 
-                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED || state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             // Determine the video is the current hover window update hover window
                             EaseCallMemberView floatView = EaseCallFloatWindow.getInstance().getCallMemberView();
                             if (floatView != null && floatView.getUserId() == uid) {
@@ -372,6 +376,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
                     if (state == REMOTE_AUDIO_STATE_STARTING) {
                         //first frame
                         EMLog.d(TAG, "onRemoteAudioStateChanged:" +uid + ",elapsed:" + elapsed);
+                        applyCurrentAudioRoute();
                         if (isFinishing()) {
                             return;
                         }
@@ -689,8 +694,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
         mBinding.btnMicSwitchVoice.setActivated(false);
         mBinding.btnVidicon.setActivated(true);
-        mBinding.btnSpeakerSwitchVoice.setActivated(true);
-        EaseCallAudioControl.getInstance().openSpeakerOn();
+        changeSpeakerState(isVideoCall());
         mBinding.surfaceViewGroup.setCallType(callType);
 
         //If you are invited, an invitation window is displayed
@@ -788,6 +792,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
             //Because there is a applet set to live mode, the role is set to master
             mRtcEngine.setChannelProfile(CHANNEL_PROFILE_LIVE_BROADCASTING);
             mRtcEngine.setClientRole(CLIENT_ROLE_BROADCASTER);
+            applyAudioRoute(isVideoCall());
 
             // Set the small window hover type
             EaseCallFloatWindow.getInstance().setCallType(callType);
@@ -840,7 +845,7 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
 
     public EaseCallMemberView createCallMemberView() {
         EaseCallMemberView memberView = new EaseCallMemberView(getApplicationContext());
-        SurfaceView surfaceView = RtcEngine.CreateRendererView(getApplicationContext());
+        SurfaceView surfaceView = new SurfaceView(getApplicationContext());
         surfaceView.setZOrderOnTop(false);
         surfaceView.setZOrderMediaOverlay(false);
         memberView.addSurfaceView(surfaceView);
@@ -897,14 +902,33 @@ public class EaseCallMultipleBaseActivity extends EaseCallBaseActivity implement
     }
 
     private void changeSpeakerState(boolean isActive) {
-        localMemberView.setSpeakActivated(isActive);
+        isSpeakerOn = isActive;
+        if (localMemberView != null) {
+            localMemberView.setSpeakActivated(isActive);
+        }
         mBinding.btnSpeakerSwitchVoice.setActivated(isActive);
         mBinding.btnSpeakerSwitchVoice.setBackground(isActive ? getResources().getDrawable(R.drawable.ease_call_voice_on) : getResources().getDrawable(R.drawable.ease_call_voice_off));
-        if (isActive) {
+        applyAudioRoute(isActive);
+    }
+
+    private void applyAudioRoute(boolean useSpeakerphone) {
+        if (mRtcEngine != null) {
+            mRtcEngine.setDefaultAudioRoutetoSpeakerphone(useSpeakerphone);
+            mRtcEngine.setEnableSpeakerphone(useSpeakerphone);
+        }
+        if (useSpeakerphone) {
             EaseCallAudioControl.getInstance().openSpeakerOn();
         } else {
             EaseCallAudioControl.getInstance().closeSpeakerOn();
         }
+    }
+
+    private void applyCurrentAudioRoute() {
+        applyAudioRoute(isVideoCall() || isSpeakerOn);
+    }
+
+    private boolean isVideoCall() {
+        return callType == EaseCallType.CONFERENCE_VIDEO_CALL;
     }
 
     private void changeVideoState(boolean showVideo) {

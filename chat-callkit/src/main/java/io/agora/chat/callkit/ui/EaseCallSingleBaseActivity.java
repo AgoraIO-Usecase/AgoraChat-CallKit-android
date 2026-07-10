@@ -10,7 +10,7 @@ import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_MAKE_SIGNAL_VOICE
 import static io.agora.chat.callkit.utils.EaseCallMsgUtils.MSG_RELEASE_HANDLER;
 import static io.agora.rtc2.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
 import static io.agora.rtc2.Constants.CLIENT_ROLE_BROADCASTER;
-import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_PLAYING;
+import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_DECODING;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED;
 import static io.agora.rtc2.Constants.REMOTE_VIDEO_STATE_STOPPED;
@@ -159,11 +159,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VOICE_CALL) {
-                        setSpeakerMode(false);
-                    } else {
-                        setSpeakerMode(true);
-                    }
+                    setSpeakerMode(isVideoCall());
                     if (!isInComingCall) {
                         //send invite message
                         if (EaseCallKit.getInstance().getCallType() == EaseCallType.SINGLE_VIDEO_CALL) {
@@ -188,6 +184,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 @Override
                 public void run() {
                     EaseCallAudioControl.getInstance().stopPlayRing();
+                    setSpeakerMode(isVideoCall());
                     // the remote come in
                     makeOngoingStatus();
                     setUserJoinChannelInfo(null, uid);
@@ -222,6 +219,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    setSpeakerMode(true);
                     remoteUId = uid;
                     if (callType == EaseCallType.SINGLE_VIDEO_CALL) {
                         updateViewWithCameraStatus();
@@ -238,7 +236,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                         if (state == REMOTE_VIDEO_STATE_STOPPED || state == REMOTE_VIDEO_STATE_REASON_REMOTE_MUTED) {
                             isRemoteVideoMuted = true;
                             updateViewWithCameraStatus();
-                        } else if (state == REMOTE_VIDEO_STATE_PLAYING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
+                        } else if (state == REMOTE_VIDEO_STATE_DECODING || state == REMOTE_VIDEO_STATE_REASON_REMOTE_UNMUTED) {
                             isRemoteVideoMuted = false;
                             updateViewWithCameraStatus();
                         }
@@ -719,6 +717,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             //// Because there is a applet set to live mode, the role is set to master
             mRtcEngine.setChannelProfile(CHANNEL_PROFILE_LIVE_BROADCASTING);
             mRtcEngine.setClientRole(CLIENT_ROLE_BROADCASTER);
+            applyAudioRoute(isVideoCall());
         } catch (Exception e) {
             EMLog.e(TAG, Log.getStackTraceString(e));
             throw new RuntimeException("NEED TO check rtc sdk init fatal error\n" + Log.getStackTraceString(e));
@@ -843,6 +842,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 EaseCallKit.getInstance().setCallType(EaseCallType.SINGLE_VIDEO_CALL);
                 EaseCallFloatWindow.getInstance(EaseCallSingleBaseActivity.this).setCallType(callType);
                 changeVideoVoiceState();
+                setSpeakerMode(true);
                 if (mRtcEngine != null) {
                     mRtcEngine.muteLocalVideoStream(false);
                 }
@@ -850,8 +850,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
                 callType = EaseCallType.SINGLE_VOICE_CALL;
                 EaseCallKit.getInstance().setCallType(EaseCallType.SINGLE_VOICE_CALL);
                 EaseCallFloatWindow.getInstance(EaseCallSingleBaseActivity.this).setCallType(callType);
-                setSpeakerMode(true);
-                mBinding.ivSpeaker.setImageResource(R.drawable.em_icon_speaker_on);
+                setSpeakerMode(false);
                 changeVideoVoiceState();
                 if (mRtcEngine != null) {
                     mRtcEngine.muteLocalVideoStream(true);
@@ -862,6 +861,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
             callType = EaseCallType.SINGLE_VOICE_CALL;
             EaseCallKit.getInstance().setCallType(EaseCallType.SINGLE_VOICE_CALL);
             EaseCallFloatWindow.getInstance(EaseCallSingleBaseActivity.this).setCallType(callType);
+            setSpeakerMode(false);
             if (mRtcEngine != null) {
                 mRtcEngine.disableVideo();
                 mRtcEngine.muteLocalVideoStream(true);
@@ -943,18 +943,33 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
 
     private void setSpeakerMode(boolean isSpeakerOn) {
         this.isSpeakerOn = isSpeakerOn;
+        applyAudioRoute(isSpeakerOn);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (isSpeakerOn) {
                     mBinding.ivSpeaker.setImageResource(R.drawable.em_icon_speaker_on);
-                    EaseCallAudioControl.getInstance().openSpeakerOn();
                 } else {
                     mBinding.ivSpeaker.setImageResource(R.drawable.em_icon_speaker_normal);
-                    EaseCallAudioControl.getInstance().closeSpeakerOn();
                 }
             }
         });
+    }
+
+    private void applyAudioRoute(boolean useSpeakerphone) {
+        if (mRtcEngine != null) {
+            mRtcEngine.setDefaultAudioRoutetoSpeakerphone(useSpeakerphone);
+            mRtcEngine.setEnableSpeakerphone(useSpeakerphone);
+        }
+        if (useSpeakerphone) {
+            EaseCallAudioControl.getInstance().openSpeakerOn();
+        } else {
+            EaseCallAudioControl.getInstance().closeSpeakerOn();
+        }
+    }
+
+    private boolean isVideoCall() {
+        return callType == EaseCallType.SINGLE_VIDEO_CALL;
     }
 
 
@@ -1046,7 +1061,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         mBinding.oppositeSurfaceLayout.setVisibility(View.VISIBLE);
         if (idInOppositeSurfaceLayout != uid) {
             idInOppositeSurfaceLayout = uid;
-            SurfaceView localview = RtcEngine.CreateRendererView(getBaseContext());
+            SurfaceView localview = new SurfaceView(getBaseContext());
             VideoCanvas mLocalVideo = new VideoCanvas(localview, VideoCanvas.RENDER_MODE_HIDDEN, uid);
             if (uid == 0) {
                 mRtcEngine.setupLocalVideo(mLocalVideo);
@@ -1064,7 +1079,7 @@ public class EaseCallSingleBaseActivity extends EaseCallBaseActivity implements 
         mBinding.localSurfaceLayout.setVisibility(View.VISIBLE);
         if (idInLocalSurfaceLayout != uid) {
             idInLocalSurfaceLayout = uid;
-            TextureView remoteview = RtcEngine.CreateTextureView(getBaseContext());
+            TextureView remoteview = new TextureView(getBaseContext());
             setBgRadius(remoteview, dp2px(EaseCallSingleBaseActivity.this, 12));
             VideoCanvas mRemoteVideo = new VideoCanvas(remoteview, VideoCanvas.RENDER_MODE_HIDDEN, uid);
             if (uid == 0) {

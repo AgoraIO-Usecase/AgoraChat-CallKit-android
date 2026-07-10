@@ -78,7 +78,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/iv_avatar"
         tools:ignore="HardcodedText"
-        tools:text="apex" />
+        tools:text="agorachat" />
 
     <TextView
         android:id="@+id/tv_call_state"
@@ -118,7 +118,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/iv_avatar_voice"
         tools:ignore="HardcodedText"
-        tools:text="apex" />
+        tools:text="agorachat" />
 
     <TextView
         android:id="@+id/tv_call_state_voice"
